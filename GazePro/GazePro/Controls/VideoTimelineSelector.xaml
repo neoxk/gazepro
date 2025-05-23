@@ -1,0 +1,42 @@
+﻿<UserControl x:Class="GazePro.Controls.VideoTimelineSelector"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:GazePro.Controls"
+             mc:Ignorable="d" d:DesignWidth="800" Height="92">
+    <Grid x:Name="RootGrid" Background="#F2EFE7" Height="80">
+        <!-- Thumbnails Strip (placeholder for now) -->
+        <ItemsControl x:Name="ThumbnailStrip" Height="40" VerticalAlignment="Top">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Image Source="{Binding}" Width="60" Height="40" Margin="2" Stretch="UniformToFill"/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Full timeline background bar -->
+        <Rectangle Fill="#CCC" Height="6" VerticalAlignment="Bottom" Margin="0,10,0,0" RadiusX="3" RadiusY="3"/>
+
+        <!-- Highlighted cutout range -->
+        <Rectangle x:Name="CutoutRange" Fill="#48A6A7" Height="6" VerticalAlignment="Bottom" Margin="0,10,0,0"
+                   Visibility="Collapsed"/>
+
+        <!-- Start Thumb -->
+        <Thumb x:Name="StartThumb" Width="10" Height="30" Background="#006A71"
+               VerticalAlignment="Bottom" Margin="0,10,0,0" Cursor="SizeWE" Visibility="Collapsed" DragDelta="StartThumb_DragDelta"/>
+
+        <!-- End Thumb -->
+        <Thumb x:Name="EndThumb" Width="10" Height="30" Background="#006A71"
+               VerticalAlignment="Bottom" Margin="0,10,0,0" Cursor="SizeWE" Visibility="Collapsed" DragDelta="EndThumb_DragDelta"/>
+
+        <!-- Playhead -->
+        <Thumb x:Name="Playhead" Width="4" Height="40" Background="Red"
+               VerticalAlignment="Bottom" Margin="0,10,0,0" Cursor="SizeWE" DragDelta="Playhead_DragDelta"/>
+    </Grid>
+</UserControl>
