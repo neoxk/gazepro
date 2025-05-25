@@ -96,7 +96,7 @@ window.addEventListener('DOMContentLoaded', () => {
         trainVideo.pause();
         trainVideo.removeEventListener('timeupdate', onTime);
         afterClip.querySelector('p').textContent =
-          `Katero območje (1–6) je vratar branil? (resnično: ${category})`;
+          `Katero območje (1–7) je vratar branil? (resnično: ${category})`;
         afterClip.classList.remove('hidden');
         userInput.focus();
       }

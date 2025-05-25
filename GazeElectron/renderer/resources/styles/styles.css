@@ -1,3 +1,15 @@
+
+:root {
+  --primary: #006D77;
+  --primary-dark: #004D4D;
+  --accent: #EF8354;
+  --accent-hover: #FF9B6A;
+  --background: #FAF9F6;
+  --text: #1A1A1A;
+  --surface: #FFFFFF;
+  --border: #E0E0E0;
+}
+
 body {
   margin: 0;
   display: grid;
@@ -7,15 +19,16 @@ body {
 }
 header {
   grid-row: 1;
-  background: #004D4D; color: #FFF;
+  background: var(--primary-dark); 
+  color: var(--border);
   display: flex; align-items: center; padding: 0 1.5rem;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 header h1 { font-size: 1.2rem; margin: 0; }
 #btn-select-folder {
   margin-left: auto;
-  background: #006F6F; border: none; padding: .5rem 1rem;
-  color: #FFF; border-radius: 4px; cursor: pointer;
+  background: var(--primary); border: none; padding: .5rem 1rem;
+  color: var(--surface); border-radius: 4px; cursor: pointer;
 }
 #btn-select-folder:hover { background: #008E8E }
 
@@ -28,8 +41,8 @@ nav#tabs button {
   cursor: pointer; font-weight: bold; color: #555;
 }
 nav#tabs button.active {
-  background: #FFF; border-bottom: 3px solid #D45F00;
-  color: #000;
+  background: var(--surface); border-bottom: 3px solid var(--accent);
+  color: var(--text);
 }
 
 #container {
@@ -40,18 +53,18 @@ nav#tabs button.active {
 }
 #video-list {
   background: #F7F7F3; padding: 1rem; overflow-y: auto;
-  border-right: 1px solid #DDD;
+  border-right: 1px solid var(--border);
 }
 .video-item {
   padding: .6rem; margin-bottom: .3rem;
-  background: #FFF; border-radius: 3px; cursor: pointer;
+  background: var(--surface); border-radius: 3px; cursor: pointer;
   transition: background .2s;
 }
 .video-item:hover { background: #EFEFEA; }
 
 main {
   position: relative;
-  background: #FFF; overflow: auto;
+  background: var(--surface); overflow: auto;
   padding: 1rem;
 }
 .tab-content { display: none; }
@@ -72,33 +85,24 @@ video {
 #timeline { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
 .cut-segment {
   position: absolute; top: 0; bottom: 0;
-  background: rgba(212,95,0,0.5); border-left: 1px solid #D45F00;
+  background: rgba(212,95,0,0.5); border-left: 1px solid var(--accent);
   z-index: 1;
 }
 
-#controls {
-  display: flex; gap: 1rem; align-items: center;
-}
-#controls label { font-size: .9rem; color: #333; }
-#controls input, #controls select {
-  margin-left: .3rem; padding: .2rem; border: 1px solid #CCC;
-  border-radius: 3px; width: 4rem;
-}
-#btn-add-cut {
+.btn-theme {
   padding: .5rem 1rem; border: none; border-radius: 4px;
-  background: #D45F00; color: #FFF; cursor: pointer;
+  background: var(--accent); color: var(--surface); cursor: pointer;
 }
-#btn-add-cut:hover { background: #E06F1A; }
+.btn-theme:hover { background: var(--accent-hover); }
 
 #cutout-table {
   width: 100%; border-collapse: collapse; margin-top: 1rem;
 }
 #cutout-table th, #cutout-table td {
-  border: 1px solid #DDD; padding: .5rem; text-align: left;
+  border: 1px solid var(--border); padding: .5rem; text-align: left;
 }
 #cutout-table th { background: #F5F5F0; }
 .hidden { display: none; }
-
 
 #training-config label {
   display: block; margin: .5rem 0;
@@ -116,4 +120,8 @@ video {
 }
 #series-stats {
   margin-bottom: 1rem;
+}
+
+.bg {
+  background-color: var(--accent);
 }

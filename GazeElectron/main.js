@@ -39,8 +39,9 @@ ipcMain.handle('select-folder', async () => {
         const lines = fs.readFileSync(txtPath, 'utf8')
           .split(/\r?\n/).filter(Boolean)
         cuts = lines.map(line => {
-          const [s, e, cat] = line.split(',')
+          const [n, s, e, cat] = line.split(',')
           return {
+            name:     String(n),
             start:    parseFloat(s),
             end:      parseFloat(e),
             category: parseInt(cat, 10)
@@ -59,7 +60,7 @@ ipcMain.handle('save-cuts', async (_evt, { videoPath, cuts }) => {
   const base   = path.parse(videoPath).name
   const txt    = path.join(folder, `${base}.txt`)
   const lines  = cuts.map(c =>
-    [c.start.toFixed(3), c.end.toFixed(3), c.category].join(',')
+    [c.name, c.start.toFixed(3), c.end.toFixed(3), c.category].join(',')
   )
   fs.writeFileSync(txt, lines.join('\n'))
   return { success: true }

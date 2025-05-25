@@ -1,5 +1,6 @@
 const videoPlayer = document.getElementById('video-player');
 const timeline    = document.getElementById('timeline');
+const nameInput   = document.getElementById('cutout-name');
 const preInput    = document.getElementById('pre');
 const postInput   = document.getElementById('post');
 const catSelect   = document.getElementById('category');
@@ -15,10 +16,11 @@ btnAdd.addEventListener('click', async () => {
   const current = window.appState.current;
   if (!current) return;
   const t     = videoPlayer.currentTime;
+  const name  = nameInput.value;
   const start = Math.max(0, t - parseFloat(preInput.value));
   const end   = Math.min(videoPlayer.duration, t + parseFloat(postInput.value));
   const cat   = parseInt(catSelect.value, 10);
-  current.cuts.push({ start, end, category: cat });
+  current.cuts.push({ name, start, end, category: cat });
   await window.electronAPI.saveCuts(current.videoPath, current.cuts);
   drawCuts();
   document.dispatchEvent(new CustomEvent('cutlist-updated'));

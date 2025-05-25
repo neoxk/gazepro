@@ -3,17 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <title>GazePro</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="./resources/styles/styles.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="./resources/styles/styles.css">
 </head>
 <body>
   <header>
     <h1>GazePro</h1>
-    <button id="btn-select-folder">Select Folder…</button>
+    <button id="btn-select-folder">Izberi mapo</button>
   </header>
 
   <nav id="tabs">
-    <button data-tab="editor"   class="active">Editor</button>
-    <button data-tab="cutouts">Cutouts</button>
+    <button data-tab="editor"   class="active">Urednik posnetkov</button>
+    <button data-tab="cutouts">Izrezi posnetkov</button>
     <button data-tab="training">Trenažni modul</button>
   </nav>
 
@@ -31,66 +34,116 @@
           <div id="timeline-wrapper">
             <div id="timeline"></div>
           </div>
-          <div id="controls">
-            <label>Pre (s): <input type="number" id="pre" value="2" min="0" step="0.1"></label>
-            <label>Post (s):<input type="number" id="post" value="2" min="0" step="0.1"></label>
-            <label>Območje (1–6):
-            <select id="category">
-              <option value="1">1 – levo spodaj</option>
-              <option value="2">2 – sredina spodaj</option>
-              <option value="3">3 – desno spodaj</option>
-              <option value="4">4 – levo zgoraj</option>
-              <option value="5">5 – sredina zgoraj</option>
-              <option value="6">6 – desno zgoraj</option>
-            </select>
-          </label>
-            <button id="btn-add-cut">Add Cut</button>
+          <div id="controls" class="container mt-3">
+            <div class="row g-3 align-items-end">
+
+              <div class="col-md-4">
+                <label for="cutout-name" class="form-label">Naziv:</label>
+                <input type="text" class="form-control" id="cutout-name" value="Posnetek">
+              </div>
+
+              <div class="col-md-2">
+                <label for="pre" class="form-label">Pre (s):</label>
+                <input type="number" class="form-control" id="pre" value="2" min="0" step="0.1">
+              </div>
+
+              <div class="col-md-2">
+                <label for="post" class="form-label">Post (s):</label>
+                <input type="number" class="form-control" id="post" value="2" min="0" step="0.1">
+              </div>
+
+              <div class="col-md-4">
+                <label for="category" class="form-label">Območje (1–9):</label>
+                <select id="category" class="form-select">
+                  <option value="1">1 – levo spodaj</option>
+                  <option value="2">2 – sredina spodaj</option>
+                  <option value="3">3 – desno spodaj</option>
+                  <option value="4">4 – levo sredina</option>
+                  <option value="5">5 – sredina</option>
+                  <option value="6">6 – desno sredina</option>
+                  <option value="7">7 – levo zgoraj</option>
+                  <option value="8">8 – sredina zgoraj</option>
+                  <option value="9">9 – desno zgoraj</option>
+                </select>
+              </div>
+
+              <div class="col-md-12">
+                <button id="btn-add-cut" class="btn btn-theme w-100">Shrani izrez</button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- CUTOUTS TAB -->
       <section id="cutouts" class="tab-content hidden">
-        <h2>All Cutouts</h2>
-        <table id="cutout-table">
-          <thead><tr><th>Video</th><th>Start</th><th>End</th><th>Category</th><th>Actions</th></tr></thead>
-          <tbody></tbody>
-        </table>
+        <h2 class="mb-4">Vsi izrezi posnetkov</h2>
+
+        <div class="accordion" id="cutouts-accordion">
+          
+        </div>
       </section>
 
+
       <!-- TRAINING MODULE -->
-      <section id="training" class="tab-content hidden">
-        <h2>Trenažni modul</h2>
-        <div id="training-config">
-          <label>Število serij: <input type="number" id="series-count" value="3" min="1"></label>
-          <label>Posnetkov na serijo: <input type="number" id="clips-per-series" value="5" min="1"></label>
-          <label>Hitrost (0.5–2.0×): <input type="number" id="speed-factor" value="1" min="0.5" max="2" step="0.1"></label>
-          <label>Odmor med ponovitvami (s): <input type="number" id="rest-rep" value="2" min="0"></label>
-          <label>Odmor med serijami (s): <input type="number" id="rest-series" value="5" min="0"></label>
-          <button id="btn-start-training">Začni trening</button>
+      <section id="training" class="tab-content hidden card shadow-sm">
+        <div class="card-header bg text-white text-center">
+          <h2 class="mb-0">Trenažni modul</h2>
+        </div>
+        <div id="training-config" class="card-body row g-3">
+          <div class="col-md-4">
+            <label for="series-count" class="form-label">Število serij</label>
+            <input type="number" id="series-count" class="form-control" value="3" min="1">
+          </div>
+          <div class="col-md-4">
+            <label for="clips-per-series" class="form-label">Posnetkov na serijo</label>
+            <input type="number" id="clips-per-series" class="form-control" value="5" min="1">
+          </div>
+          <div class="col-md-4">
+            <label for="speed-factor" class="form-label">Hitrost (0.5 – 2.0×)</label>
+            <input type="number" id="speed-factor" class="form-control" value="1" min="0.5" max="2" step="0.1">
+          </div>
+          <div class="col-md-6">
+            <label for="rest-rep" class="form-label">Odmor med ponovitvami (s)</label>
+            <input type="number" id="rest-rep" class="form-control" value="2" min="0">
+          </div>
+          <div class="col-md-6">
+            <label for="rest-series" class="form-label">Odmor med serijami (s)</label>
+            <input type="number" id="rest-series" class="form-control" value="5" min="0">
+          </div>
+          <div class="col-12">
+            <button id="btn-start-training" class="btn btn-theme w-100">Začni trening</button>
+          </div>
         </div>
         <div id="training-panel" class="hidden">
-          <video id="train-video" controls></video>
-          <div id="after-clip" class="hidden">
+          <video id="train-video" controls class="my-4"></video>
+          <div id="after-clip" class="hidden m-4">
             <p></p>
             <input type="number" id="user-input" />
-            <button id="btn-submit-input">Potrdi</button>
+            <div class="col-12">
+              <button id="btn-submit-input" class="btn btn-theme w-100">Potrdi</button>
+            </div>
           </div>
           <div id="training-stats" class="hidden">
             <h3>Statistika</h3>
             <div id="series-stats"></div>
-            <button id="btn-end-training">Zaključi</button>
+            <div class="col-12">
+              <button id="btn-end-training" class="btn btn-theme w-100">Zaključi</button>
+            </div>
           </div>
-          <button id="btn-restart-training">Restart</button>
+          <div class="col-12 p-4">
+            <button id="btn-restart-training" class="btn btn-theme w-100">Ponovni zagon</button>
+          </div>
         </div>
       </section>
     </main>
   </div>
 
-  <script src="tabs.js"></script>
-  <script src="sidebar.js"></script>
-  <script src="editor.js"></script>
-  <script src="cutouts.js"></script>
-  <script src="training.js"></script>
+  <script src="./modules/tabs.js"></script>
+  <script src="./modules/sidebar.js"></script>
+  <script src="./modules/editor.js"></script>
+  <script src="./modules/cutouts.js"></script>
+  <script src="./modules/training.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
