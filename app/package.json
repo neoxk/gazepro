@@ -27,7 +27,8 @@
     "bootstrap": "^5.3.6",
     "bootstrap-icons": "^1.13.1",
     "electron-updater": "^6.3.9",
-    "react-router-dom": "^7.6.1"
+    "react-router-dom": "^7.6.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
