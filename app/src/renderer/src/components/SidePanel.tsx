@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import man from '../assets/images/handball-man.svg';
 
 interface SidePanelProps {

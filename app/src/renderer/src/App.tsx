@@ -5,27 +5,26 @@ import { NavBar } from './components/NavBar';
 import { SidePanel } from './components/SidePanel';
 import { SavedVideos } from './components/SavedVideos';
 import { VideoEditor } from './components/VideoEditor';
+import { Training } from './components/Training';
 
 
 function App(): React.JSX.Element {
   const [selectedVideoPath, setSelectedVideoPath] = useState<string | null>(null);
   const location = useLocation();
 
-  const getPageTitle = () => {
-    if (location.pathname === '/saved') return 'Saved Videos';
-    return 'Video Editor';
-  };
-
   return (
     <>
-      <NavBar activePage={getPageTitle()} />
-      {location.pathname === '/' && (
-        <SidePanel onVideoSelect={setSelectedVideoPath} />
-      )}
-      <Routes>
-        <Route path="/" element={<VideoEditor selectedVideoPath={selectedVideoPath} />} />
-        <Route path="/saved" element={<SavedVideos />} />
-      </Routes>
+      <NavBar />
+      <div className="app-scroll-container">
+  {location.pathname === '/' && (
+    <SidePanel onVideoSelect={setSelectedVideoPath} />
+  )}
+  <Routes>
+    <Route path="/" element={<VideoEditor selectedVideoPath={selectedVideoPath} />} />
+    <Route path="/saved" element={<SavedVideos />} />
+    <Route path="/training" element={<Training />} />
+  </Routes>
+</div>
     </>
   );
 }

@@ -22,6 +22,8 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
   const [newCategory, setNewCategory] = useState('');
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const videoName = selectedVideoPath ? selectedVideoPath.split('/').pop() : null;
+
   const handleSaveCutout = () => {
     if (!videoRef.current) return;
     const current = videoRef.current.currentTime;
@@ -58,6 +60,9 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
 
   return (
     <div className="ms-280 p-4 text-dark" style={{ marginLeft: '280px' }}>
+      <h2 className="mb-3 text-dark">
+        {videoName ? videoName : "Video Editor"}
+      </h2>
       {/* Video Player */}
       <div className="mb-3">
         {selectedVideoPath ? (

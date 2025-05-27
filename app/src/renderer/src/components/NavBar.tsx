@@ -1,18 +1,19 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+
 import logo from '@renderer/assets/images/logo-placeholder.png';
 import usFlag from '@renderer/assets/images/us.png';
 import siFlag from '@renderer/assets/images/si.png';
 
-interface NavBarProps {
-  activePage: string;
-}
 
-export const NavBar = ({ activePage }: NavBarProps) => {
+export const NavBar = () => {
+  const location = useLocation();
+  
   const navItems = [
     { label: 'Video Editor', path: '/' },
     { label: 'Saved Videos', path: '/saved' },
-    { label: 'Analytics', path: '/analytics' },
+    { label: 'Training Module', path: '/training' },
   ];
+
 
   return (
     <nav className="navbar bg-dark text-white px-4 shadow-sm fixed-top" style={{ height: '64px', zIndex: 10 }}>
@@ -30,7 +31,7 @@ export const NavBar = ({ activePage }: NavBarProps) => {
             <Link
               key={label}
               to={path}
-              className={`nav-link fw-medium ${activePage === label ? 'text-red-damask' : 'text-white'}`}
+              className={`nav-link fw-medium ${location.pathname === path ? 'text-red-damask' : 'text-white'}`}
               style={{ fontSize: '15px' }}
             >
               {label}
