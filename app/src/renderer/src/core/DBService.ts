@@ -27,6 +27,8 @@ class DBService {
         }
       });
     }
+
+    //TODO if the fields change and the database already exists there needs to be some way of migrating the old structure and rows to the new one
   }
 
 

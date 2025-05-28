@@ -17,7 +17,7 @@ class HandballController {
   private tsService: TSService<HandballTS> 
 
   constructor() {
-    this.tsService = new TSService<HandballTS>()
+    this.tsService = new TSService()
     this.initFields()
     this.tsService.initTable()
   } 
@@ -34,12 +34,20 @@ class HandballController {
     return this.fields
   }
 
-  public flushFields(): Promise<boolean> {
-    const entry = {}
-    this.fields.forEach(field => entry[field.colName] = field.val)
-    entry['tableName'] = this.tableName 
-    this.tsService.insert(entry)
+  public resetFields(): void {
+    this.initFields()
+  }
 
+  public async flushFields(): Promise<HandballTS> {
+    const entry = {}
+
+    this.fields.forEach(field => entry[field.colName] = field.val)
+
+    const row = await this.tsService.insert(this.tableName, entry)
+
+    this.resetFields()
+
+    return row
   } 
 }
 

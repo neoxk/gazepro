@@ -1,4 +1,3 @@
-import { Database } from "sqlite3"
 import dbService from "../DBService"
 
 class TSService<T> {
@@ -9,13 +8,16 @@ class TSService<T> {
   }
 
   public async initTable() {
-
+    
   }
 
-  public insert(entry: {tableName: string, [key: string]: unknown}): Promise<boolean> {
-    return new Promise((resolve) => resolve(true))
-  } 
-   
-}
+  public insert(tableName: string, entry: Record<string, unknown>): Promise<T> {
+    return new Promise(resolve => {
+        this.conn.insert(tableName, entry)
+        .then(res => resolve(res))
+      })
+    } 
+    
+  }
 
-export default TSService
+  export default TSService
