@@ -4,12 +4,22 @@ import Const from './const'
 import fs from 'fs'
 import SettingsController from './settings/SettingsController'
 import JSONSettingsController from './settings/JSONSettingsController'
+import DBService from './DBService'
 
 export default class Initializer {
   private settingsController: SettingsController
 
   constructor() {
-    this.settingsController = new JSONSettingsController(Const.SETTINGS_PATH)
+    this.settingsController = JSONSettingsController
+
+    this.settingsController.init(
+      Const.SETTINGS_PATH, 
+      {
+        databasePath: path.join(app.getPath('appData'), Const.APP_NAME, 'data.sql')
+      }
+    )
+
+    DBService.init(this.settingsController.get('databasePath'))
   }
 
   public isFirstRun(): boolean {
