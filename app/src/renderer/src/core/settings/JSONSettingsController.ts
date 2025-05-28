@@ -1,16 +1,12 @@
-import { app } from 'electron'
-import path from 'path'
-import Const from '../const'
 import fs from 'fs'
+import SettingsController from './SettingsController'
 
-export default class JSONSettingsManager implements Settings {
+export default class JSONSettingsController implements SettingsController {
   private settings: { [id: string]: string } = {}
   private SETTINGS_PATH: string
 
-  constructor(
-    settings_path: string = path.join(app.getPath('appData'), Const.APP_NAME, 'settings.json')
-  ) {
-    this.SETTINGS_PATH = settings_path
+  constructor(settings_path) {
+    this.SETTINGS_PATH = settings_path + '/settings.json'
 
     let settings_raw
 

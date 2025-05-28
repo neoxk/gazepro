@@ -2,18 +2,14 @@ import { app } from 'electron'
 import path from 'path'
 import Const from './const'
 import fs from 'fs'
-import Settings from './settings/Settings'
-import JSONSettingsManager from './settings/JSONSettingsManager'
-import Timestamper from './timestamp/Timestamper'
-import SQLiteTimerstamper from './timestamp/SQLiteTimerstamper'
+import SettingsController from './settings/SettingsController'
+import JSONSettingsController from './settings/JSONSettingsController'
 
 export default class Initializer {
-  private settingsController: Settings
-  private timestampService: Timestamper
+  private settingsController: SettingsController
 
   constructor() {
-    this.settingsController = new JSONSettingsManager()
-    this.timestampService = new SQLiteTimerstamper()
+    this.settingsController = new JSONSettingsController(Const.SETTINGS_PATH)
   }
 
   public isFirstRun(): boolean {
@@ -24,5 +20,9 @@ export default class Initializer {
     if (!fs.existsSync(app_folder)) {
       fs.mkdirSync(app_folder)
     }
+  }
+
+  public getSettingsController() {
+    return this.settingsController
   }
 }
