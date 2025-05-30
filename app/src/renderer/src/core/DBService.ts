@@ -28,7 +28,6 @@ class DBService {
       });
     }
 
-    //TODO if the fields change and the database already exists there needs to be some way of migrating the old structure and rows to the new one
   }
 
 
@@ -40,6 +39,12 @@ class DBService {
 
     return this._knex(tableName).insert(entry);
   }
+
+  public async query(tableName: string, filter: Record<string, unknown>) {
+    if (!this._knex) throw new Error("init() must be called first.");
+    return this._knex(tableName).where(filter);
+  }
+
 }
 
 export default new DBService();

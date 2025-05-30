@@ -17,8 +17,12 @@ function App(): React.JSX.Element {
       <NavBar />
       <div className="app-scroll-container">
   {location.pathname === '/' && (
-    <SidePanel onVideoSelect={setSelectedVideoPath} />
+    <SidePanel
+      selectedVideoPath={selectedVideoPath}
+      onVideoSelect={setSelectedVideoPath}
+    />
   )}
+
   <Routes>
     <Route path="/" element={<VideoEditor selectedVideoPath={selectedVideoPath} />} />
     <Route path="/saved" element={<SavedVideos />} />

@@ -20,6 +20,15 @@ export default class Initializer {
     )
 
     DBService.init(this.settingsController.get('databasePath'))
+
+    DBService.initTable('cutouts', [
+      { colName: 'video_path', type: 'text' },
+      { colName: 'start',      type: 'real' },
+      { colName: 'end',        type: 'real' },
+      { colName: 'label',      type: 'text' },
+      { colName: 'zone',       type: 'integer' },
+      { colName: 'categories', type: 'text' },
+    ]);
   }
 
   public isFirstRun(): boolean {

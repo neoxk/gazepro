@@ -1,54 +1,86 @@
-import { JSX, useState } from "react";
-
-import data from '../assets/data';
-import handballMan from '@renderer/assets/images/handball-man.svg';
-import videoPlaceholder from '@renderer/assets/images/video-placeholder.png';
+import React, { JSX, useEffect, useState } from 'react'
+import handballMan from '@renderer/assets/images/handball-man.svg'
+import videoPlaceholder from '@renderer/assets/images/video-placeholder.png'
 
 interface SavedVideo {
-  id: string;
-  title: string;
-  duration: string;
-  source: string;
-  category: string;
-  videoUrl: string;
-  thumbnailUrl: string;
+  id: string
+  title: string
+  duration: string
+  source: string
+  category: string
+  videoUrl: string
+  thumbnailUrl: string
+  start: number
+  end: number
 }
 
-const sampleData: SavedVideo[] = data;
-
 export const SavedVideos = (): JSX.Element => {
-  const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
-  const [sortOptions, setSortOptions] = useState<{ [key: string]: boolean }>({
+  const [cutouts, setCutouts] = useState<SavedVideo[]>([])
+  const [playingVideoId, setPlayingVideoId] = useState<string | null>(null)
+  const [sortOptions, setSortOptions] = useState<Record<string, boolean>>({
     Title: false,
     Duration: false,
     Category: false,
-  });
+  })
 
-  const grouped = sampleData.reduce((acc, video) => {
-    acc[video.category] = acc[video.category] || [];
-    acc[video.category].push(video);
-    return acc;
-  }, {} as Record<string, SavedVideo[]>);
+  useEffect(() => {
+    ;(async () => {
+      const rows: Array<{
+        video_path: string
+        start: number
+        end: number
+        label: string
+        zone: number
+        categories: string[]
+      }> = await (window.api as any).loadAllCutouts()
 
-  const handleSortToggle = (option: string) => {
-    setSortOptions({ ...sortOptions, [option]: !sortOptions[option] });
-  };
+      const transformed: SavedVideo[] = rows.map((r, idx) => {
+        const durSec = r.end - r.start
+        const mm = Math.floor(durSec / 60)
+          .toString()
+          .padStart(2, '0')
+        const ss = Math.floor(durSec % 60)
+          .toString()
+          .padStart(2, '0')
+        const filename = r.video_path.split('/').pop() || r.video_path
+        const firstCat = r.categories.length ? r.categories[0] : 'Uncategorized'
 
-  const togglePlay = (videoId: string) => {
-    setPlayingVideoId((prev) => (prev === videoId ? null : videoId));
-  };
+        return {
+          id: idx.toString(),
+          title: r.label,
+          duration: `${mm}:${ss}`,
+          source: filename,
+          category: firstCat,
+          videoUrl: r.video_path,
+          thumbnailUrl: '',
+          start: r.start,
+          end: r.end,
+        }
+      })
+
+      setCutouts(transformed)
+    })()
+  }, [])
+
+  const grouped = cutouts.reduce<Record<string, SavedVideo[]>>((acc, video) => {
+    (acc[video.category] ||= []).push(video)
+    return acc
+  }, {})
+
+  const handleSortToggle = (option: string) =>
+    setSortOptions({ ...sortOptions, [option]: !sortOptions[option] })
+
+  const togglePlay = (videoId: string) =>
+    setPlayingVideoId((prev) => (prev === videoId ? null : videoId))
 
   return (
     <div className="position-relative">
-      {/* Background Image */}
-      <img
-        src={handballMan}
-        alt="Handball Background"
-        className="handball-bg"
-      />
+      <img src={handballMan} alt="Handball Background" className="handball-bg" />
 
-      <div className="container mt-5 text-dark position-relative" style={{ zIndex: 1 }}>
-        {/* Header with sort dropdown */}
+      <div
+        className="container mt-5 text-dark position-relative"
+        style={{ zIndex: 1 }}
+      >
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h2 className="mb-0 text-dark">Saved Videos</h2>
           <div className="dropdown">
@@ -70,7 +102,10 @@ export const SavedVideos = (): JSX.Element => {
                     checked={sortOptions[option]}
                     onChange={() => handleSortToggle(option)}
                   />
-                  <label className="form-check-label ms-2" htmlFor={`sort-${option}`}>
+                  <label
+                    className="form-check-label ms-2"
+                    htmlFor={`sort-${option}`}
+                  >
                     {option}
                   </label>
                 </li>
@@ -79,27 +114,39 @@ export const SavedVideos = (): JSX.Element => {
           </div>
         </div>
 
-        {/* Video categories */}
         {Object.entries(grouped).map(([category, videos]) => (
           <div key={category} className="mb-5">
             <h5 className="mb-3">{category}</h5>
             <div className="d-flex flex-wrap gap-4">
               {videos.map((video) => (
-                <div key={video.id} className="card" style={{ width: "18rem" }}>
+                <div key={video.id} className="card" style={{ width: '18rem' }}>
                   {playingVideoId === video.id ? (
                     <video
                       src={video.videoUrl}
                       className="card-img-top"
                       controls
-                      onClick={() => togglePlay(video.id)}
-                      style={{ height: "180px", objectFit: "cover" }}
+                      autoPlay
+                      onLoadedMetadata={(e) => {
+                        e.currentTarget.currentTime = video.start
+                      }}
+                      onTimeUpdate={(e) => {
+                        if (e.currentTarget.currentTime >= video.end) {
+                          e.currentTarget.pause()
+                          setPlayingVideoId(null)
+                        }
+                      }}
+                      style={{ height: '180px', objectFit: 'cover' }}
                     />
                   ) : (
                     <img
                       src={video.thumbnailUrl || videoPlaceholder}
                       alt={video.title}
                       className="card-img-top"
-                      style={{ height: "180px", objectFit: "cover", cursor: "pointer" }}
+                      style={{
+                        height: '180px',
+                        objectFit: 'cover',
+                        cursor: 'pointer',
+                      }}
                       onClick={() => togglePlay(video.id)}
                     />
                   )}
@@ -112,7 +159,9 @@ export const SavedVideos = (): JSX.Element => {
                       <strong>Source:</strong> {video.source}
                     </p>
                     <div className="text-center mt-4">
-                      <button className="btn btn-danger w-50"><i className="bi bi-trash"></i> Delete</button>
+                      <button className="btn btn-danger w-50">
+                        <i className="bi bi-trash"></i> Delete
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -123,5 +172,5 @@ export const SavedVideos = (): JSX.Element => {
         ))}
       </div>
     </div>
-  );
-};
+  )
+}

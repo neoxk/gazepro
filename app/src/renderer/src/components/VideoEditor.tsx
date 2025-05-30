@@ -1,4 +1,13 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
+
+declare global {
+  interface Window {
+    api: {
+      loadCutouts: (videoPath: string) => Promise<Cutout[]>;
+      saveCutout: (cutout: any) => Promise<void>;
+    };
+  }
+}
 
 interface Cutout {
   start: number;
@@ -24,17 +33,27 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
 
   const videoName = selectedVideoPath ? selectedVideoPath.split('/').pop() : null;
 
-  const handleSaveCutout = () => {
-    if (!videoRef.current) return;
-    const current = videoRef.current.currentTime;
-    const newCutout: Cutout = {
-      start: Math.max(0, current - pre),
-      end: current + post,
-      label: `${label} (${zone})`,
-      categories: selectedCategories,
-    };
-    setCutouts([...cutouts, newCutout]);
+  useEffect(() => {
+    if (!selectedVideoPath) return setCutouts([]);
+    window.api.loadCutouts(selectedVideoPath)
+      .then((rows) => setCutouts(rows));
+  }, [selectedVideoPath]);
+
+  const handleSaveCutout = async () => {
+  if (!videoRef.current || !selectedVideoPath) return;
+  const current = videoRef.current.currentTime;
+  const newCutout = {
+    video_path: selectedVideoPath,
+    start: Math.max(0, current - pre),
+    end:   current + post,
+    label: `${label} (${zone})`,
+    zone:  Number(zone),
+    categories: selectedCategories,
   };
+  await window.api.saveCutout(newCutout);
+  setCutouts([...cutouts, newCutout]);
+};
+
 
   const handleCategoryToggle = (category: string) => {
     setSelectedCategories((prev) =>

@@ -16,8 +16,13 @@ class TSService<T> {
         this.conn.insert(tableName, entry)
         .then(res => resolve(res))
       })
-    } 
+    }
+
+    public query(tableName: string, filter: Record<string, unknown>): Promise<T[]> {
+      return this.conn.query(tableName, filter);
+    }
     
   }
+  
 
   export default TSService

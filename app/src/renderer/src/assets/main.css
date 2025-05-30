@@ -43,13 +43,15 @@
 }
 
 .aside-side-panel {
-    width: 280px;
-    height: 100vh;
-    position: fixed;
-    top: 64px;
-    left: 0;
-    overflow-y: auto;
-    border-right: 1px solid #444;
+  position: fixed;
+  top: 64px;
+  bottom: 0;
+  left: 0;
+  width: 280px;
+  overflow-y: auto;
+  border-right:    1px solid #444;
+  z-index: 10;
+  background:      var(--ev-c-black);
 }
 
 .img-cover {
@@ -58,9 +60,15 @@
   left: 0;
   right: 0;
   height: 25%;
-  overflow: hidden;
   pointer-events: none;
+  z-index: 0;
 }
+
+.aside-side-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
 
 .handball-man {
   width: 120%;
