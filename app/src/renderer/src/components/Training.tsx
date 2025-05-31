@@ -218,7 +218,7 @@ export const Training = () => {
           <div className="col-md-6">
             <button
               type="button"
-              className="btn btn-primary w-100"
+              className="btn btn-red-damask w-100"
               onClick={handleStart}
               disabled={started}
             >

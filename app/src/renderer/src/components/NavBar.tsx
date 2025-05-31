@@ -1,9 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 
 import logo from '@renderer/assets/images/logo-placeholder.png';
 import usFlag from '@renderer/assets/images/us.png';
 import siFlag from '@renderer/assets/images/si.png';
 
+interface Language {
+  code: string;
+  name: string;
+  flag: string;
+}
 
 export const NavBar = () => {
   const location = useLocation();
@@ -14,6 +20,12 @@ export const NavBar = () => {
     { label: 'Training Module', path: '/training' },
   ];
 
+  const languages: Language[] = [
+    { code: 'en', name: 'English', flag: usFlag },
+    { code: 'si', name: 'Slovenščina', flag: siFlag },
+  ];
+
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>(languages[0]);
 
   return (
     <nav className="navbar bg-dark text-white px-4 shadow-sm fixed-top" style={{ height: '64px', zIndex: 10 }}>
@@ -47,22 +59,21 @@ export const NavBar = () => {
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            <img src={usFlag} alt="English" width={16} height={16} className="me-2" />
-            English
+            <img src={selectedLanguage.flag} alt={selectedLanguage.name} width={16} height={16} className="me-2" />
+            {selectedLanguage.name}
           </button>
           <ul className="dropdown-menu dropdown-menu-end">
-            <li>
-              <a className="dropdown-item d-flex align-items-center" href="#">
-                <img src={usFlag} alt="English" width={16} height={16} className="me-2" />
-                English
-              </a>
-            </li>
-            <li>
-              <a className="dropdown-item d-flex align-items-center" href="#">
-                <img src={siFlag} alt="Slovenščina" width={16} height={16} className="me-2" />
-                Slovenščina
-              </a>
-            </li>
+            {languages.map((lang) => (
+              <li key={lang.code}>
+                <button
+                  className="dropdown-item d-flex align-items-center"
+                  onClick={() => setSelectedLanguage(lang)}
+                >
+                  <img src={lang.flag} alt={lang.name} width={16} height={16} className="me-2" />
+                  {lang.name}
+                </button>
+              </li>
+            ))}
           </ul>
         </div>
       </div>

@@ -16,19 +16,19 @@ function App(): React.JSX.Element {
     <>
       <NavBar />
       <div className="app-scroll-container">
-  {location.pathname === '/' && (
-    <SidePanel
-      selectedVideoPath={selectedVideoPath}
-      onVideoSelect={setSelectedVideoPath}
-    />
-  )}
+        {location.pathname === '/' && (
+          <SidePanel
+            selectedVideoPath={selectedVideoPath}
+            onVideoSelect={setSelectedVideoPath}
+          />
+        )}  
 
-  <Routes>
-    <Route path="/" element={<VideoEditor selectedVideoPath={selectedVideoPath} />} />
-    <Route path="/saved" element={<SavedVideos />} />
-    <Route path="/training" element={<Training />} />
-  </Routes>
-</div>
+        <Routes>
+          <Route path="/" element={<VideoEditor selectedVideoPath={selectedVideoPath} />} />
+          <Route path="/saved" element={<SavedVideos />} />
+          <Route path="/training" element={<Training />} />
+        </Routes>
+      </div>
     </>
   );
 }
