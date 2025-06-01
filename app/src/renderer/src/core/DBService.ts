@@ -45,6 +45,13 @@ class DBService {
     return this._knex(tableName).where(filter);
   }
 
+  public async delete(
+    tableName: string,
+    filter: Record<string, unknown>
+  ): Promise<number[]> {
+    return (this._knex!(tableName).where(filter).del() as unknown) as number[];
+}
+
 }
 
 export default new DBService();

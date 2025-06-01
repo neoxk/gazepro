@@ -4,7 +4,7 @@ declare global {
   interface Window {
     electron: ElectronAPI
     api: {
-      openVideo: () => Promise<string | null>
+      openFolder: () => Promise<string[]>
       saveCutout: (c: {
         video_path: string
         start: number
@@ -35,6 +35,16 @@ declare global {
           categories: string[]
         }>
       >
+      deleteCutout: (id: number) => Promise<void>
+      saveCutoutWithThumbnail: (payload: {
+        video_path: string
+        start: number
+        end: number
+        label: string
+        zone: number
+        categories: string[]
+        thumbnailDataUrl: string
+      }) => Promise<void>
     }
   }
 }

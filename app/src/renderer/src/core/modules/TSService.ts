@@ -21,8 +21,10 @@ class TSService<T> {
     public query(tableName: string, filter: Record<string, unknown>): Promise<T[]> {
       return this.conn.query(tableName, filter);
     }
-    
-  }
-  
 
-  export default TSService
+  public delete(tableName: string, filter: Record<string, unknown>): Promise<number> {
+    return this.conn.delete(tableName, filter).then((result: number[]) => result[0]);
+  }
+}
+    
+export default TSService
