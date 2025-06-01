@@ -34,7 +34,7 @@ export const Modal = ({ children, onClose }: ModalProps): JSX.Element => {
       }}
     >
       <div
-        className="modal-content-container text-black"
+        className="modal-content-container text-black app-scroll-bar"
         onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: 'white',

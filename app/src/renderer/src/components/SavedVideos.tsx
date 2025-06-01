@@ -28,6 +28,10 @@ export const SavedVideos = (): JSX.Element => {
   const [selectedVideo, setSelectedVideo] = useState<SavedVideo | null>(null)
   const [editedVideo, setEditedVideo] = useState<SavedVideo | null>(null)
   const [showModal, setShowModal] = useState(false)
+
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [newCategory, setNewCategory] = useState('')
+  const [allCategories, setAllCategories] = useState<string[]>([])
   
   useEffect(() => {
     ;(async () => {
@@ -84,6 +88,11 @@ export const SavedVideos = (): JSX.Element => {
       })
       
       setCutouts(transformed)
+
+      const allCats = Array.from(
+        new Set(transformed.map((v) => v.category).filter(Boolean))
+      )
+      setAllCategories(allCats)
     })()
   }, [])
   
@@ -131,6 +140,7 @@ export const SavedVideos = (): JSX.Element => {
   const handleCardClick = (video: SavedVideo) => {
     setSelectedVideo(video)
     setEditedVideo({ ...video })
+    setSelectedCategories(video.category ? [video.category] : [])
     setShowModal(true)
   }
   
@@ -146,10 +156,12 @@ export const SavedVideos = (): JSX.Element => {
   
   const handleSaveChanges = async () => {
     if (!editedVideo) return
-      setCutouts((prev) =>
-      prev.map((v) => (v.id === editedVideo.id ? editedVideo : v))
-      )
-      setShowModal(false)
+    const newCat = selectedCategories[0] || 'Uncategorized'
+    const updated = { ...editedVideo, category: newCat }
+    setCutouts((prev) =>
+      prev.map((v) => (v.id === updated.id ? updated : v))
+    )
+    setShowModal(false)
   }
   
   const handleDeleteModal = async () => {
@@ -160,6 +172,26 @@ export const SavedVideos = (): JSX.Element => {
       }
       setCutouts((prev) => prev.filter((v) => v.id !== editedVideo.id))
       setShowModal(false)
+  }
+
+  const handleCategoryToggle = (cat: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(cat)
+        ? prev.filter((c) => c !== cat)
+        : [...prev, cat]
+    )
+  }
+
+  const handleRemoveCategory = (cat: string) => {
+    setSelectedCategories((prev) => prev.filter((c) => c !== cat))
+  }
+
+  const handleAddCategory = () => {
+    const trimmed = newCategory.trim()
+    if (!trimmed) return
+    if (!allCategories.includes(trimmed)) setAllCategories((prev) => [...prev, trimmed])
+    setSelectedCategories((prev) => [...prev, trimmed])
+    setNewCategory('')
   }
   
   const togglePlay = (videoId: string) =>
@@ -173,211 +205,225 @@ export const SavedVideos = (): JSX.Element => {
   
   return (
     <div className="position-relative">
-    <img src={handballMan} alt="Handball Background" className="handball-bg" />
-    
-    <div
-    className="container mt-5 text-dark position-relative"
-    style={{ zIndex: 1 }}
-    >
-    {/* Header + Sort Dropdown */}
-    <div className="d-flex justify-content-between align-items-center mb-4">
-    <h2 className="mb-0 text-dark">Saved Videos</h2>
-    <div className="dropdown">
-    <button
-    className="btn btn-outline-secondary dropdown-toggle"
-    type="button"
-    data-bs-toggle="dropdown"
-    aria-expanded="false"
-    >
-    Sort
-    </button>
-    <ul className="dropdown-menu dropdown-menu-end px-3 py-2">
-    {Object.keys(sortOptions).map((option) => (
-      <li key={option} className="form-check">
-      <input
-      className="form-check-input"
-      type="checkbox"
-      id={`sort-${option}`}
-      checked={sortOptions[option]}
-      onChange={() => handleSortToggle(option)}
-      />
-      <label
-      className="form-check-label ms-2"
-      htmlFor={`sort-${option}`}
+      <img src={handballMan} alt="Handball Background" className="handball-bg" />
+      <div
+        className="container mt-5 text-dark position-relative"
+        style={{ zIndex: 1 }}
       >
-      {option}
-      </label>
-      </li>
-    ))}
-    </ul>
-    </div>
-    </div>
-    
-    {/* Render grouped cutouts by category */}
-    {Object.entries(grouped).map(([category, videos]) => (
-      <div key={category} className="mb-5">
-      <h5 className="mb-3">{category}</h5>
-      <div className="d-flex flex-wrap gap-4">
-      {videos.map((video) => (
-        <div
-        key={video.id}
-        className="card"
-        style={{ width: '18rem' }}
-        >
-        {playingVideoId === video.id.toString() ? (
-          <video
-          src={video.videoUrl}
-          className="card-img-top"
-          controls
-          autoPlay
-          onLoadedMetadata={(e) => {
-            e.currentTarget.currentTime = video.start
-          }}
-          onTimeUpdate={(e) => {
-            if (e.currentTarget.currentTime >= video.end) {
-              e.currentTarget.pause()
-              setPlayingVideoId(null)
-            }
-          }}
-          style={{ height: '180px', objectFit: 'cover' }}
-          />
-        ) : (
-          <img
-          src={video.thumbnail_path || videoPlaceholder}
-          alt={video.title}
-          className="card-img-top"
-          style={{
-            height: '180px',
-            objectFit: 'cover',
-            cursor: 'pointer',
-          }}
-          onClick={() =>
-            togglePlay(video.id.toString())
-          }
-          />
+      {/* Header + Sort Dropdown */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="mb-0 text-dark">Saved Videos</h2>
+        <div className="dropdown">
+          <button
+            className="btn btn-outline-secondary dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            >
+            Sort
+          </button>
+          <ul className="dropdown-menu dropdown-menu-end px-3 py-2">
+            {Object.keys(sortOptions).map((option) => (
+              <li key={option} className="form-check">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id={`sort-${option}`}
+                  checked={sortOptions[option]}
+                  onChange={() => handleSortToggle(option)}
+                />
+                <label
+                  className="form-check-label ms-2"
+                  htmlFor={`sort-${option}`}
+                >
+                  {option}
+                </label>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      
+      {/* Render grouped cutouts by category */}
+      {Object.entries(grouped).map(([category, videos]) => (
+        <div key={category} className="mb-5">
+          <h5 className="mb-3">{category}</h5>
+          <div className="d-flex flex-wrap gap-4">
+            {videos.map((video) => (
+              <div
+                key={video.id}
+                className="card"
+                style={{ width: '18rem' }}
+              >
+              {playingVideoId === video.id.toString() ? (
+                <video
+                  src={video.videoUrl}
+                  className="card-img-top"
+                  controls
+                  autoPlay
+                  onLoadedMetadata={(e) => {
+                    e.currentTarget.currentTime = video.start
+                  }}
+                  onTimeUpdate={(e) => {
+                    if (e.currentTarget.currentTime >= video.end) {
+                      e.currentTarget.pause()
+                      setPlayingVideoId(null)
+                    }
+                  }}
+                  style={{ height: '180px', objectFit: 'cover' }}
+                />
+              ) : (
+                <img
+                  src={video.thumbnail_path || videoPlaceholder}
+                  alt={video.title}
+                  className="card-img-top"
+                  style={{
+                    height: '180px',
+                    objectFit: 'cover',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() =>
+                    togglePlay(video.id.toString())
+                  }
+                />
+              )}
+              <div className="card-body">
+                <h5 className="card-title">{video.title}</h5>
+                <p className="card-text mb-1">
+                  <strong>Duration:</strong> {video.duration}
+                </p>
+                <p className="card-text mb-2">
+                  <strong>Source:</strong> {video.source}
+                </p>
+                <div className="d-flex align-items-center gap-2 mt-3">
+                  <button
+                    className="btn btn-light btn-red-damask flex-grow-1"
+                    onClick={() => handleCardClick(video)}
+                  >
+                    Details
+                  </button>
+                  <button
+                    className="btn btn-outline-danger"
+                    onClick={() => handleDeleteCard(video.id)}
+                  >
+                    <i className="bi bi-trash"></i>
+                  </button>
+                </div>
+            </div>
+          </div>
+        ))}
+        </div>
+        
+        {showModal && editedVideo && (
+          <Modal onClose={() => setShowModal(false)}>
+            <h3 className="modal-title mb-4">{editedVideo.title}</h3>
+              <video
+                controls
+                className="w-100 mb-3 border rounded"
+                src={editedVideo.videoUrl}
+                autoPlay
+                onLoadedMetadata={(e) => {
+                  e.currentTarget.currentTime = editedVideo.start
+                }}
+                onTimeUpdate={(e) => {
+                  if (e.currentTarget.currentTime >= editedVideo.end) {
+                    e.currentTarget.pause()
+                  }
+                }}
+              />
+              <h5 className="mb-3">Snippet Information</h5>
+              <div className="mb-3">
+                <label className="form-label">Title</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={editedVideo.title}
+                  onChange={(e) => handleEditChange('title', e.target.value)}
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Duration</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={editedVideo.duration}
+                  disabled
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Source</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={editedVideo.source}
+                  disabled
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Area (Zone)</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={editedVideo.zone ?? ''}
+                  onChange={(e) => handleEditChange('zone', e.target.value)}
+                />
+              </div>
+              <div className="mb-3">
+          <label className="form-label">Categories:</label>
+          <div className="dropdown w-100">
+            <button className="form-select text-start" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              {selectedCategories.length > 0 ? selectedCategories.join(', ') : 'Select categories'}
+            </button>
+            <ul className="dropdown-menu px-3 py-2 w-100" style={{ minWidth: '250px' }}>
+              {allCategories.map((cat) => (
+                <li key={cat} className="d-flex align-items-center justify-content-between">
+                  <div className="form-check me-2">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id={`cat-${cat}`}
+                      checked={selectedCategories.includes(cat)}
+                      onChange={() => handleCategoryToggle(cat)}
+                    />
+                    <label className="form-check-label ms-2" htmlFor={`cat-${cat}`}>{cat}</label>
+                  </div>
+                  <button type="button" className="btn btn-sm py-0 px-2" title="Remove category" onClick={() => handleRemoveCategory(cat)}>&minus;</button>
+                </li>
+              ))}
+              <li><hr className="dropdown-divider" /></li>
+              <li>
+                <div className="input-group input-group-sm">
+                  <input type="text" className="form-control" placeholder="New category" value={newCategory} onChange={(e) => setNewCategory(e.target.value)} />
+                  <button type="button" className="btn btn-outline-secondary" onClick={handleAddCategory}>+</button>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+              <div className="modal-footer d-flex justify-content-end gap-2 mt-5">
+                <button
+                  type="button"
+                  className="btn btn-light"
+                  onClick={handleDeleteModal}
+                >
+                  Delete
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-red-damask"
+                  onClick={handleSaveChanges}
+                >
+                  Save Changes
+                </button>
+              </div>
+
+          </Modal>
         )}
-        <div className="card-body">
-        <h5 className="card-title">{video.title}</h5>
-        <p className="card-text mb-1">
-        <strong>Duration:</strong> {video.duration}
-        </p>
-        <p className="card-text mb-2">
-        <strong>Source:</strong> {video.source}
-        </p>
-        <div className="d-flex justify-content-between mt-3">
-        <button
-        className="btn btn-outline-primary"
-        onClick={() => handleCardClick(video)}
-        >
-        Details
-        </button>
-        <button
-        className="btn btn-danger"
-        onClick={() => handleDeleteCard(video.id)}
-        >
-        <i className="bi bi-trash"></i>
-        </button>
-        </div>
-        </div>
+        
+        <hr className="mt-5" />
         </div>
       ))}
       </div>
-      
-      {showModal && editedVideo && (
-        <Modal onClose={() => setShowModal(false)}>
-        <h5 className="modal-title mb-3">{editedVideo.title}</h5>
-        <video
-        controls
-        className="w-100 mb-3 border rounded"
-        src={editedVideo.videoUrl}
-        autoPlay
-        onLoadedMetadata={(e) => {
-          e.currentTarget.currentTime = editedVideo.start
-        }}
-        onTimeUpdate={(e) => {
-          if (e.currentTarget.currentTime >= editedVideo.end) {
-            e.currentTarget.pause()
-          }
-        }}
-        />
-        <h5 className="mb-3">Snippet Information</h5>
-        <div className="mb-3">
-        <label className="form-label">Title</label>
-        <input
-        type="text"
-        className="form-control"
-        value={editedVideo.title}
-        onChange={(e) => handleEditChange('title', e.target.value)}
-        />
-        </div>
-        <div className="mb-3">
-        <label className="form-label">Duration</label>
-        <input
-        type="text"
-        className="form-control"
-        value={editedVideo.duration}
-        disabled
-        />
-        </div>
-        <div className="mb-3">
-        <label className="form-label">Source</label>
-        <input
-        type="text"
-        className="form-control"
-        value={editedVideo.source}
-        disabled
-        />
-        </div>
-        <div className="mb-3">
-        <label className="form-label">Area (Zone)</label>
-        <input
-        type="number"
-        className="form-control"
-        value={editedVideo.zone ?? ''}
-        onChange={(e) => handleEditChange('zone', e.target.value)}
-        />
-        </div>
-        <div className="mb-3">
-        <label className="form-label">Category</label>
-        <input
-        type="text"
-        className="form-control"
-        value={editedVideo.category}
-        onChange={(e) =>
-          handleEditChange('category', e.target.value)
-        }
-        />
-        </div>
-        <div className="modal-footer d-flex justify-content-between">
-        <button
-        type="button"
-        className="btn btn-primary"
-        onClick={handleSaveChanges}
-        >
-        Save Changes
-        </button>
-        <button
-        type="button"
-        className="btn btn-danger"
-        onClick={handleDeleteModal}
-        >
-        Delete
-        </button>
-        <button
-        type="button"
-        className="btn btn-light"
-        onClick={() => setShowModal(false)}
-        >
-        Close
-        </button>
-        </div>
-        </Modal>
-      )}
-      
-      <hr className="mt-5" />
-      </div>
-    ))}
-    </div>
     </div>
   )
 }

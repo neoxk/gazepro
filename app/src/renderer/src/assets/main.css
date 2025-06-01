@@ -40,6 +40,7 @@
 .btn-red-damask:hover {
   background-color: #e36443;
   color: white;
+  border-color: #ff6d49;
 }
 
 .aside-side-panel {
@@ -63,7 +64,7 @@
 
 .img-cover {
   position: absolute;
-  bottom: 60px;
+  bottom: 0;
   left: 0;
   right: 0;
   height: 25%;
@@ -76,13 +77,12 @@
   z-index: 1;
 }
 
-
 .handball-man {
-  width: 120%;
+  width: 125%;
   max-width: none;
   object-fit: cover;
   object-position: left top;
-  transform: translateX(-17%);
+  transform: translateX(-15%);
 }
 
 .handball-bg {
@@ -121,4 +121,29 @@
 
 .app-scroll-container::-webkit-scrollbar-thumb:hover {
   background-color: #c74e2d;
+}
+
+.app-scroll-bar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.app-scroll-bar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-scroll-bar::-webkit-scrollbar-thumb {
+  background-color: #e36443;
+  border-radius: 8px;
+}
+
+.app-scroll-bar::-webkit-scrollbar-thumb:hover {
+  background-color: #c74e2d;
+}
+
+.truncate-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-grow: 1;
+  min-width: 0;
 }

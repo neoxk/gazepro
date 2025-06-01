@@ -38,7 +38,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
   const [duration, setDuration] = useState(0)
 
   const videoName = selectedVideoPath
-    ? selectedVideoPath.split('/').pop()
+    ? selectedVideoPath.split(/[/\\]+/).pop()
     : null
 
   useEffect(() => {

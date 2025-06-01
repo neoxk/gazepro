@@ -14,15 +14,21 @@ export const SidePanel = ({
   onVideoSelect,
   onOpenFolder,
 }: SidePanelProps) => {
-  const selectedName = selectedVideoPath?.split('/').pop() || null
+  const selectedName = selectedVideoPath?.split(/[/\\]+/).pop() || null
 
   return (
     <aside className="bg-dark text-white d-flex flex-column p-3 side-panel aside-side-panel">
       <h5 className="mb-4">Videos</h5>
-
+      <button
+        className="btn btn-outline-light w-100 mb-4"
+        onClick={onOpenFolder}
+      >
+        <i className="bi bi-folder2-open me-2" />
+        Open Folder…
+      </button>
       <ul className="nav nav-pills flex-column mb-auto">
         {videoList.map((fullPath) => {
-          const filename = fullPath.split('/').pop()!
+          const filename = fullPath.split(/[/\\]+/).pop()!
           const isSelected = filename === selectedName
           return (
             <li key={fullPath} className="nav-item">
@@ -32,9 +38,12 @@ export const SidePanel = ({
                 }`}
                 style={{ border: 'none' }}
                 onClick={() => onVideoSelect(fullPath)}
+                title={filename}
               >
                 <i className="bi bi-play-circle me-2" />
-                {filename}
+                <span className="text-truncate d-inline-block" style={{ maxWidth: '180px' }}>
+                  {filename}
+                </span>
               </button>
             </li>
           )
@@ -44,14 +53,6 @@ export const SidePanel = ({
       <div className="img-cover">
         <img src={man} alt="Handball Man" className="handball-man" />
       </div>
-
-      <button
-        className="btn btn-outline-light w-100 mt-3"
-        onClick={onOpenFolder}
-      >
-        <i className="bi bi-folder2-open me-2" />
-        Open Folder…
-      </button>
     </aside>
   )
 }
