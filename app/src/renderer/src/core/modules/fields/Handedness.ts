@@ -1,3 +1,5 @@
+import { Field } from './Field'
+
 interface IHandedness {
   goal_pos: number
 }

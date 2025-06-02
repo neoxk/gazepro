@@ -1,13 +1,5 @@
 import { useRef, useState, useEffect } from 'react'
-
-declare global {
-  interface Window {
-    api: {
-      loadCutouts: (videoPath: string) => Promise<Cutout[]>
-      saveCutout: (cutout: any) => Promise<void>
-    }
-  }
-}
+import { Video } from '../core/video/VideoController'
 
 interface Cutout {
   start: number
@@ -17,10 +9,10 @@ interface Cutout {
 }
 
 interface Props {
-  selectedVideoPath: string | null
+  selectedVideo: Video | null
 }
 
-export const VideoEditor = ({ selectedVideoPath }: Props) => {
+export const VideoEditor = ({ selectedVideo }: Props) => {
   const [cutouts, setCutouts] = useState<Cutout[]>([])
   const [pre, setPre] = useState(2)
   const [post, setPost] = useState(2)
@@ -29,7 +21,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
   const [allCategories, setAllCategories] = useState<string[]>([
     'Reflex',
     'Positioning',
-    'Reactions',
+    'Reactions'
   ])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [newCategory, setNewCategory] = useState('')
@@ -37,9 +29,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
 
   const [duration, setDuration] = useState(0)
 
-  const videoName = selectedVideoPath
-    ? selectedVideoPath.split(/[/\\]+/).pop()
-    : null
+  const videoName = selectedVideoPath ? selectedVideoPath.split(/[/\\]+/).pop() : null
 
   useEffect(() => {
     if (!selectedVideoPath) {
@@ -62,19 +52,19 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
     const current = videoRef.current.currentTime
     const newCutoutFields = {
       video_path: selectedVideoPath,
-      start:      Math.max(0, current - pre),
-      end:        current + post,
-      label:      `${label}`,
-      zone:       Number(zone),
-      categories: selectedCategories,
+      start: Math.max(0, current - pre),
+      end: current + post,
+      label: `${label}`,
+      zone: Number(zone),
+      categories: selectedCategories
     }
 
     const snapshotTime = newCutoutFields.start + 0.5
     const dataUrl: string = await new Promise((resolve) => {
-      const tempVideo = document.createElement("video")
+      const tempVideo = document.createElement('video')
       tempVideo.src = selectedVideoPath
-      tempVideo.crossOrigin = "anonymous"
-      tempVideo.preload = "metadata"
+      tempVideo.crossOrigin = 'anonymous'
+      tempVideo.preload = 'metadata'
       tempVideo.muted = true
       tempVideo.playsInline = true
 
@@ -83,36 +73,36 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
         tempVideo.currentTime = Math.max(0, t)
       }
       const onSeek = () => {
-    const intrinsicW = tempVideo.videoWidth
-    const intrinsicH = tempVideo.videoHeight
-    const captureW = Math.min(intrinsicW, 320)
-    const captureH = (intrinsicH / intrinsicW) * captureW
+        const intrinsicW = tempVideo.videoWidth
+        const intrinsicH = tempVideo.videoHeight
+        const captureW = Math.min(intrinsicW, 320)
+        const captureH = (intrinsicH / intrinsicW) * captureW
 
-    const canvas = document.createElement("canvas")
-    canvas.width = captureW
-    canvas.height = captureH
-    const ctx = canvas.getContext("2d")!
-    ctx.drawImage(tempVideo, 0, 0, captureW, captureH)
+        const canvas = document.createElement('canvas')
+        canvas.width = captureW
+        canvas.height = captureH
+        const ctx = canvas.getContext('2d')!
+        ctx.drawImage(tempVideo, 0, 0, captureW, captureH)
 
-    try {
-      const jpegUrl = canvas.toDataURL("image/jpeg", 0.9)
-      resolve(jpegUrl)
-    } catch {
-      resolve("")
-    } finally {
-      tempVideo.removeEventListener("seeked", onSeek)
-      tempVideo.removeEventListener("loadedmetadata", onMeta)
-      tempVideo.src = ""
-    }
-  }
+        try {
+          const jpegUrl = canvas.toDataURL('image/jpeg', 0.9)
+          resolve(jpegUrl)
+        } catch {
+          resolve('')
+        } finally {
+          tempVideo.removeEventListener('seeked', onSeek)
+          tempVideo.removeEventListener('loadedmetadata', onMeta)
+          tempVideo.src = ''
+        }
+      }
 
-      tempVideo.addEventListener("loadedmetadata", onMeta, { once: true })
-      tempVideo.addEventListener("seeked", onSeek, { once: true })
+      tempVideo.addEventListener('loadedmetadata', onMeta, { once: true })
+      tempVideo.addEventListener('seeked', onSeek, { once: true })
     })
 
     await (window.api as any).saveCutoutWithThumbnail({
       ...newCutoutFields,
-      thumbnailDataUrl: dataUrl,
+      thumbnailDataUrl: dataUrl
     })
 
     if (selectedVideoPath) {
@@ -123,9 +113,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
 
   const handleCategoryToggle = (category: string) => {
     setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
+      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]
     )
   }
 
@@ -145,9 +133,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
 
   return (
     <div className="ms-280 p-4 text-dark" style={{ marginLeft: '280px' }}>
-      <h2 className="mb-3 text-dark">
-        {videoName ? videoName : 'Video Editor'}
-      </h2>
+      <h2 className="mb-3 text-dark">{videoName ? videoName : 'Video Editor'}</h2>
 
       {/* Video Player */}
       <div className="mb-3">
@@ -189,7 +175,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
                   top: 0,
                   left: `${leftPct}%`,
                   width: `${widthPct}%`,
-                  opacity: 0.7,
+                  opacity: 0.7
                 }}
               />
             )
@@ -197,7 +183,12 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
       </div>
 
       {/* Cutout Form */}
-      <form onSubmit={(e) => { e.preventDefault(); handleSaveCutout() }}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          handleSaveCutout()
+        }}
+      >
         <div className="row g-3 align-items-end">
           <div className="col-md-3">
             <label className="form-label text-dark">Name:</label>
@@ -232,11 +223,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
           </div>
           <div className="col-md-5">
             <label className="form-label">Area (1–9):</label>
-            <select
-              className="form-select"
-              value={zone}
-              onChange={(e) => setZone(e.target.value)}
-            >
+            <select className="form-select" value={zone} onChange={(e) => setZone(e.target.value)}>
               {Array.from({ length: 9 }, (_, i) => (
                 <option key={i + 1} value={i + 1}>
                   {i + 1} – area
@@ -257,15 +244,9 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
                   ? selectedCategories.join(', ')
                   : 'Select categories'}
               </button>
-              <ul
-                className="dropdown-menu px-3 py-2 w-100"
-                style={{ minWidth: '250px' }}
-              >
+              <ul className="dropdown-menu px-3 py-2 w-100" style={{ minWidth: '250px' }}>
                 {allCategories.map((cat) => (
-                  <li
-                    key={cat}
-                    className="d-flex align-items-center justify-content-between"
-                  >
+                  <li key={cat} className="d-flex align-items-center justify-content-between">
                     <div className="form-check me-2">
                       <input
                         className="form-check-input"
@@ -274,10 +255,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
                         checked={selectedCategories.includes(cat)}
                         onChange={() => handleCategoryToggle(cat)}
                       />
-                      <label
-                        className="form-check-label ms-2"
-                        htmlFor={`cat-${cat}`}
-                      >
+                      <label className="form-check-label ms-2" htmlFor={`cat-${cat}`}>
                         {cat}
                       </label>
                     </div>

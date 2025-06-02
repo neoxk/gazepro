@@ -1,3 +1,5 @@
+import { Field } from './Field'
+
 interface IPlayerPos {
   player_pos: number
 }

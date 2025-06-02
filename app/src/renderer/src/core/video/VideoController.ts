@@ -3,6 +3,14 @@ import fs from 'fs'
 import JSONSettingsController from '../settings/JSONSettingsController'
 import path from 'path'
 
+interface Video {
+  id: number
+  name: string
+  path: string
+  refresh_rate: number
+  sport: string
+}
+
 class VideoController {
   private conn: typeof DBService = DBService
   private TABLE_NAME = 'videos'
@@ -46,7 +54,7 @@ class VideoController {
     }
   }
 
-  public async getVideos() {
+  public async getVideos(): Promise<Video[]> {
     if (!this.sport) throw new Error('You must first call init()')
     return this.conn.query(this.TABLE_NAME, {
       sport: this.sport
@@ -55,3 +63,4 @@ class VideoController {
 }
 
 export default new VideoController()
+export type { Video }

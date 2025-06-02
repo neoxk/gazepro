@@ -2,6 +2,7 @@ import { DefensePos, IDefensePos } from '../fields/DefensePos'
 import { GoalPos, IGoalPos } from '../fields/GoalPos'
 import SportController from '../SportController'
 import TSService from '../TSService'
+import { Field } from '../fields/Field'
 
 interface HandballTS extends IDefensePos, IGoalPos {
   id: number

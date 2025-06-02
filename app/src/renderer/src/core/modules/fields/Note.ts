@@ -1,3 +1,5 @@
+import { Field } from './Field'
+
 interface INote {
   note: string
 }
