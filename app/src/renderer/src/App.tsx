@@ -19,6 +19,7 @@ export default function App(): React.JSX.Element {
       setVideoList(paths)
       setSelectedVideoPath(paths[0])
     }
+    return paths
   }
 
   const location = useLocation()
@@ -26,7 +27,7 @@ export default function App(): React.JSX.Element {
   return (
     <>
       {!appStarted ? (
-        <Home onContinue={() => setAppStarted(true)} />
+        <Home onContinue={() => setAppStarted(true)} onOpenFolder={handleOpenFolder} />
       ) : (
         <>
           <NavBar />

@@ -13,15 +13,17 @@ interface Language {
 
 interface HomeProps {
     onContinue: () => void
+    onOpenFolder: () => Promise<string[]>
 }
 
-export const Home = ({ onContinue }: HomeProps): JSX.Element => {
+export const Home = ({ onContinue, onOpenFolder }: HomeProps): JSX.Element => {
     const [selectedSport, setSelectedSport] = useState('Handball');
     const [folderSelected, setFolderSelected] = useState(false); // placeholder for folder logic
     
-    const handleFolderSelect = () => {
-        // folder open logic
-        setFolderSelected(true);
+    const handleFolderSelect = async () => {
+        const result = await onOpenFolder();
+            if (result && Array.isArray(result) && result.length > 0)
+                setFolderSelected(true); 
     };
     
     const handleContinue = () => {
