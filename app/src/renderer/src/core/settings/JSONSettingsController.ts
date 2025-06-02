@@ -2,12 +2,9 @@ import fs from 'fs'
 import SettingsController from './SettingsController'
 
 class JSONSettingsController implements SettingsController {
+  private settings: { [id: string]: string } = {}
 
-  private settings: { [id: string]: string } = {
-  }
-
-  private SETTINGS_PATH = ""
-
+  private SETTINGS_PATH = ''
 
   init(settings_path: string, default_settings: { [id: string]: string }) {
     this.settings = default_settings
@@ -16,15 +13,16 @@ class JSONSettingsController implements SettingsController {
     let settings_raw
 
     if (!fs.existsSync(this.SETTINGS_PATH)) {
+      fs.mkdirSync(settings_path, { recursive: true })
       fs.writeFileSync(this.SETTINGS_PATH, JSON.stringify(this.settings), 'utf-8')
     } else {
-        try {
-          settings_raw = fs.readFileSync(this.SETTINGS_PATH, 'utf-8')
-        } catch (err: any) {}
+      try {
+        settings_raw = fs.readFileSync(this.SETTINGS_PATH, 'utf-8')
+      } catch (err: any) {}
 
-        try {
-          this.settings = JSON.parse(settings_raw)
-        } catch (err) {}
+      try {
+        this.settings = JSON.parse(settings_raw)
+      } catch (err) {}
     }
   }
 
@@ -35,7 +33,7 @@ class JSONSettingsController implements SettingsController {
   }
 
   public get(id: string) {
-    if (this.settings[id] === undefined) throw new Error(id + " is not set in settings")
+    if (this.settings[id] === undefined) throw new Error(id + ' is not set in settings')
     return this.settings[id]
   }
 

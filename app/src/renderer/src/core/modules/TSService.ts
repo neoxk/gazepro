@@ -1,30 +1,34 @@
-import dbService from "../DBService"
+import { table } from 'console'
+import dbService from '../DBService'
 
 class TSService<T> {
   private conn: typeof dbService
+  private fields: Field[]
+  private tableName: string
 
-  constructor() {
-    this.conn = dbService 
+  constructor(tableName: string, fields: Field[]) {
+    this.fields = fields
+    this.conn = dbService
+    this.tableName = tableName
   }
 
   public async initTable() {
-    
+    this.fields.forEach((field) => {})
   }
 
-  public insert(tableName: string, entry: Record<string, unknown>): Promise<T> {
-    return new Promise(resolve => {
-        this.conn.insert(tableName, entry)
-        .then(res => resolve(res))
-      })
-    }
+  public insert(entry: Record<string, unknown>): Promise<T> {
+    return new Promise((resolve) => {
+      this.conn.insert(this.tableName, entry).then((res) => resolve(res))
+    })
+  }
 
-    public query(tableName: string, filter: Record<string, unknown>): Promise<T[]> {
-      return this.conn.query(tableName, filter);
-    }
+  public query(filter: Record<string, unknown>): Promise<T[]> {
+    return this.conn.query(this.tableName, filter)
+  }
 
-  public delete(tableName: string, filter: Record<string, unknown>): Promise<number> {
-    return this.conn.delete(tableName, filter).then((result: number[]) => result[0]);
+  public delete(filter: Record<string, unknown>): Promise<number> {
+    return this.conn.delete(this.tableName, filter).then((result: number[]) => result[0])
   }
 }
-    
+
 export default TSService

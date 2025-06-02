@@ -1,34 +1,31 @@
-import {DefensePos, IDefensePos} from "../fields/DefensePos"
-import {GoalPos, IGoalPos} from "../fields/GoalPos"
-import TSService from "../TSService"
+import { DefensePos, IDefensePos } from '../fields/DefensePos'
+import { GoalPos, IGoalPos } from '../fields/GoalPos'
+import SportController from '../SportController'
+import TSService from '../TSService'
 
 interface HandballTS extends IDefensePos, IGoalPos {
-  id: number,
-  idVideo: number,
-  refPoint: number,
-  from: number,
-  to: number,
+  id: number
+  idVideo: number
+  refPoint: number
+  from: number
+  to: number
 }
 
-class HandballController {
+class HandballController implements SportController {
   private fields: Field[] = []
   private tableName = 'handball'
 
-  private tsService: TSService<HandballTS> 
+  private tsService: TSService<HandballTS>
 
   constructor() {
-    this.tsService = new TSService()
     this.initFields()
+    this.tsService = new TSService(this.tableName, this.fields)
     this.tsService.initTable()
-  } 
-
-  private initFields() {
-    this.fields = [
-      new DefensePos(),
-      new GoalPos(),
-    ]
   }
 
+  private initFields() {
+    this.fields = [new DefensePos(), new GoalPos()]
+  }
 
   public getFields() {
     return this.fields
@@ -38,17 +35,17 @@ class HandballController {
     this.initFields()
   }
 
-  public async flushFields(): Promise<HandballTS> {
+  public async flushFields(): Promise<boolean> {
     const entry = {}
 
-    this.fields.forEach(field => entry[field.colName] = field.val)
+    this.fields.forEach((field) => (entry[field.colName] = field.val))
 
-    const row = await this.tsService.insert(this.tableName, entry)
+    const row = await this.tsService.insert(entry)
 
     this.resetFields()
 
-    return row
-  } 
+    return true
+  }
 }
 
 export default HandballController
