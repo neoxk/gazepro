@@ -9,11 +9,13 @@ interface HandballTS extends IDefensePos, IGoalPos {
   refPoint: number
   from: number
   to: number
+  [key: string]: unknown
 }
 
 class HandballController implements SportController {
   private fields: Field[] = []
-  private tableName = 'handball'
+  private tableName: string = Sport.HANDBALL
+  private loadedId: number | null = null
 
   private tsService: TSService<HandballTS>
 
@@ -40,9 +42,35 @@ class HandballController implements SportController {
 
     this.fields.forEach((field) => (entry[field.colName] = field.val))
 
-    const row = await this.tsService.insert(entry)
+    if (!this.loadedId) {
+      const row = await this.tsService.insert(entry)
+    } else {
+      await this.tsService.update(this.loadedId, entry as HandballTS)
+    }
 
     this.resetFields()
+
+    return true
+  }
+
+  public async getTimestampsOf(video_id: string): Promise<HandballTS[]> {
+    return await this.tsService.query({
+      idVideo: video_id
+    })
+  }
+
+  public async getAllTimestamps(): Promise<HandballTS[]> {
+    return await this.tsService.query({})
+  }
+
+  public async loadField(id: number): Promise<boolean> {
+    this.loadedId = id
+    const ts = await this.tsService.query({ id: id })
+
+    this.resetFields()
+    this.fields.forEach((field) => {
+      field.val = ts[field.colName]
+    })
 
     return true
   }

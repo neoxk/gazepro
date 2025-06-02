@@ -1,7 +1,6 @@
-import { table } from 'console'
 import dbService from '../DBService'
 
-class TSService<T> {
+class TSService<T extends Record<string, unknown>> {
   private conn: typeof dbService
   private fields: Field[]
   private tableName: string
@@ -20,6 +19,10 @@ class TSService<T> {
     return new Promise((resolve) => {
       this.conn.insert(this.tableName, entry).then((res) => resolve(res))
     })
+  }
+
+  public async update(id: number, entry: T): Promise<void> {
+    return await this.conn.update(this.tableName, entry)
   }
 
   public query(filter: Record<string, unknown>): Promise<T[]> {
