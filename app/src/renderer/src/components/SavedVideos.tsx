@@ -32,6 +32,12 @@ export const SavedVideos = (): JSX.Element => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [newCategory, setNewCategory] = useState('')
   const [allCategories, setAllCategories] = useState<string[]>([])
+
+  const [showAreas, setShowAreas] = useState(false)
+  const [showCategories, setShowCategories] = useState(false)
+
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedZones, setSelectedZones] = useState<number[]>([])
   
   useEffect(() => {
     ;(async () => {
@@ -195,12 +201,31 @@ export const SavedVideos = (): JSX.Element => {
   }
   
   const togglePlay = (videoId: string) =>
-  setPlayingVideoId((prev) => (prev === videoId ? null : videoId))
+    setPlayingVideoId((prev) => (prev === videoId ? null : videoId))
   
-  const grouped = cutouts.reduce<Record<string, SavedVideo[]>>((acc, video) => {
+  const toggleZone = (zone: number) => {
+    setSelectedZones((prev) =>
+      prev.includes(zone) ? prev.filter((z) => z !== zone) : [...prev, zone]
+    )
+  }
+
+  const filteredCutouts = cutouts
+    .filter((v) =>
+      v.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      v.source.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter((v) =>
+      selectedZones.length === 0 || (v.zone !== undefined && selectedZones.includes(v.zone))
+    )
+    .filter((v) =>
+      selectedCategories.length === 0 || selectedCategories.includes(v.category)
+    )
+
+
+  const grouped = filteredCutouts.reduce<Record<string, SavedVideo[]>>((acc, video) => {
     if (!acc[video.category]) acc[video.category] = []
-      acc[video.category].push(video)
-      return acc
+    acc[video.category].push(video)
+    return acc
   }, {})
   
   return (
@@ -210,37 +235,118 @@ export const SavedVideos = (): JSX.Element => {
         className="container mt-5 text-dark position-relative"
         style={{ zIndex: 1 }}
       >
+      <h2 className="mb-4 text-dark">Saved Videos</h2>
       {/* Header + Sort Dropdown */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-0 text-dark">Saved Videos</h2>
-        <div className="dropdown">
-          <button
-            className="btn btn-outline-secondary dropdown-toggle"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
+      <div className="row mb-4 g-3 align-items-center">
+        <div className="col-md-9">
+          <div className="input-group">
+            <span className="input-group-text bg-red-damask">
+              <i className="bi bi-search text-white"></i>
+            </span>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search by title or source..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="col-md-3">
+          <div className="dropdown">
+            <button
+              className="btn btn-red-damask dropdown-toggle w-100"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
             >
-            Sort
-          </button>
-          <ul className="dropdown-menu dropdown-menu-end px-3 py-2">
-            {Object.keys(sortOptions).map((option) => (
-              <li key={option} className="form-check">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id={`sort-${option}`}
-                  checked={sortOptions[option]}
-                  onChange={() => handleSortToggle(option)}
-                />
-                <label
-                  className="form-check-label ms-2"
-                  htmlFor={`sort-${option}`}
+              Sort & Filter
+            </button>
+            <div className="dropdown-menu p-3 w-100"
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowAreas(false)
+                setShowCategories(false)
+              }}>
+              <h6 className="dropdown-header">Simple Sort</h6>
+              {Object.keys(sortOptions).map((option) => (
+                <div key={option} className="form-check">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id={`sort-${option}`}
+                    checked={sortOptions[option]}
+                    onChange={() => handleSortToggle(option)}
+                  />
+                  <label className="form-check-label ms-2" htmlFor={`sort-${option}`}>{option}</label>
+                </div>
+              ))}
+
+              <hr className="dropdown-divider" />
+              <h6 className="dropdown-header">Advanced Filter</h6>
+
+              <div className="dropdown mb-3">
+                <button
+                  className="btn btn-sm btn-outline-red-damask w-100"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowAreas(!showAreas)
+                    setShowCategories(false)
+                  }}
                 >
-                  {option}
-                </label>
-              </li>
-            ))}
-          </ul>
+                  Select Areas
+                </button>
+                {showAreas && (
+                  <ul className="dropdown-menu show p-2 w-100" style={{ display: 'block' }} onClick={(e) => e.stopPropagation()}>
+                    {Array.from({ length: 9 }, (_, i) => (
+                      <li key={i + 1} className="form-check">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id={`zone-${i + 1}`}
+                          checked={selectedZones.includes(i + 1)}
+                          onChange={() => toggleZone(i + 1)}
+                        />
+                        <label className="form-check-label ms-2" htmlFor={`zone-${i + 1}`}>{i + 1} – Area</label>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              <div className="dropdown">
+                <button
+                  className="btn btn-sm btn-outline-red-damask w-100"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowCategories(!showCategories)
+                    setShowAreas(false)
+                  }}
+                >
+                  Select Categories
+                </button>
+                {showCategories && (
+                  <ul className="dropdown-menu show p-2 w-100" style={{ display: 'block' }} onClick={(e) => e.stopPropagation()}>
+                    {allCategories.map((cat) => (
+                      <li key={cat} className="form-check">
+                        <input
+                          className="form-check-input"
+                          type="checkbox"
+                          id={`filter-cat-${cat}`}
+                          checked={selectedCategories.includes(cat)}
+                          onChange={() => handleCategoryToggle(cat)}
+                        />
+                        <label className="form-check-label ms-2" htmlFor={`filter-cat-${cat}`}>{cat}</label>
+                      </li>
+                    ))}
+                  </ul> 
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
