@@ -6,10 +6,12 @@ import { SidePanel } from './components/SidePanel'
 import { SavedVideos } from './components/SavedVideos'
 import { VideoEditor } from './components/VideoEditor'
 import { Training } from './components/Training'
+import { Home } from './components/Home'
 
 export default function App(): React.JSX.Element {
   const [selectedVideoPath, setSelectedVideoPath] = useState<string | null>(null)
   const [videoList, setVideoList] = useState<string[]>([])
+  const [appStarted, setAppStarted] = useState(false)
 
   const handleOpenFolder = async () => {
     const paths: string[] = await (window.api as any).openFolder()
@@ -23,27 +25,32 @@ export default function App(): React.JSX.Element {
 
   return (
     <>
-      <NavBar />
+      {!appStarted ? (
+        <Home onContinue={() => setAppStarted(true)} />
+      ) : (
+        <>
+          <NavBar />
+          <div className="app-scroll-container">
+            {location.pathname === '/' && (
+              <SidePanel
+                videoList={videoList}
+                selectedVideoPath={selectedVideoPath}
+                onVideoSelect={setSelectedVideoPath}
+                onOpenFolder={handleOpenFolder}
+              />
+            )}
 
-      <div className="app-scroll-container">
-        {location.pathname === '/' && (
-          <SidePanel
-            videoList={videoList}
-            selectedVideoPath={selectedVideoPath}
-            onVideoSelect={setSelectedVideoPath}
-            onOpenFolder={handleOpenFolder}
-          />
-        )}
-
-        <Routes>
-          <Route
-            path="/"
-            element={<VideoEditor selectedVideoPath={selectedVideoPath} />}
-          />
-          <Route path="/saved" element={<SavedVideos />} />
-          <Route path="/training" element={<Training />} />
-        </Routes>
-      </div>
+            <Routes>
+              <Route
+                path="/"
+                element={<VideoEditor selectedVideoPath={selectedVideoPath} />}
+              />
+              <Route path="/saved" element={<SavedVideos />} />
+              <Route path="/training" element={<Training />} />
+            </Routes>
+          </div>
+        </>
+      )}
     </>
   )
 }

@@ -2,7 +2,8 @@
 
 :root {
     --light-pink: #ffe6d8;
-    --red-damask: #e36443;
+    --red-damask: #ff6d49;
+    --red-damask-darker: #e36443;
     --geebung: #d48b1c;
     --brandy-punch: #dc842c;
 }
@@ -32,15 +33,28 @@
 }
 
 .btn-red-damask {
-  background-color: #ff6d49;
+  background-color: var(--red-damask);
   color: white;
   border: none;
 }
 
 .btn-red-damask:hover {
-  background-color: #e36443;
+  background-color: var(--red-damask-darker);
   color: white;
-  border-color: #ff6d49;
+  border-color: var(--red-damask-darker);
+}
+
+.btn-outline-red-damask {
+  color: var(--red-damask);
+  border: 1px solid var(--red-damask);
+  background-color: transparent;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.btn-outline-red-damask:hover,
+.btn-outline-red-damask:focus {
+  background-color: var(--red-damask);
+  color: white;
 }
 
 .aside-side-panel {
@@ -115,7 +129,7 @@
 }
 
 .app-scroll-container::-webkit-scrollbar-thumb {
-  background-color: #e36443;
+  background-color: var(--red-damask);
   border-radius: 8px;
 }
 
