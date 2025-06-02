@@ -1,5 +1,5 @@
-import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import logo from '@renderer/assets/images/logo-placeholder.png';
 import usFlag from '@renderer/assets/images/us.png';
@@ -12,8 +12,8 @@ interface Language {
 }
 
 export const NavBar = () => {
-  const location = useLocation();
-  
+  const navigate = useNavigate();
+
   const navItems = [
     { label: 'Video Editor', path: '/' },
     { label: 'Saved Videos', path: '/saved' },
@@ -26,6 +26,12 @@ export const NavBar = () => {
   ];
 
   const [selectedLanguage, setSelectedLanguage] = useState<Language>(languages[0]);
+  const [activeLabel, setActiveLabel] = useState(navItems[0].label);
+
+  const handleClick = (label: string, path: string) => {
+    setActiveLabel(label);
+    navigate(path);
+  };
 
   return (
     <nav className="navbar bg-dark text-white px-4 shadow-sm fixed-top" style={{ height: '64px', zIndex: 10 }}>
@@ -40,14 +46,14 @@ export const NavBar = () => {
         {/* Center: Navigation Links */}
         <div className="d-flex gap-4">
           {navItems.map(({ label, path }) => (
-            <Link
+            <span
               key={label}
-              to={path}
-              className={`nav-link fw-medium ${location.pathname === path ? 'text-red-damask' : 'text-white'}`}
-              style={{ fontSize: '15px' }}
+              onClick={() => handleClick(label, path)}
+              className={`fw-medium nav-link ${activeLabel === label ? 'text-red-damask' : 'text-white'}`}
+              style={{ fontSize: '15px', cursor: 'pointer' }}
             >
               {label}
-            </Link>
+            </span>
           ))}
         </div>
 
