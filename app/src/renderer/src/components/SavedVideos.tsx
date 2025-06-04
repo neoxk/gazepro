@@ -8,12 +8,14 @@ interface SavedVideo {
   title: string
   duration: string
   source: string
-  categories: string[]
+  zone?: number
+  position: string
+  hand: string
+  defended: string
   videoUrl: string
   thumbnail_path: string
   start: number
   end: number
-  zone?: number
 }
 
 export const SavedVideos = (): JSX.Element => {
@@ -30,11 +32,9 @@ export const SavedVideos = (): JSX.Element => {
   const [showModal, setShowModal] = useState(false)
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [modalCategories, setModalCategories] = useState<string[]>([])
-  const [newCategory, setNewCategory] = useState('')
   const [allCategories, setAllCategories] = useState<string[]>([])
 
-  const [modalCategoryDropdownOpen, setModalCategoryDropdownOpen] = useState(false);
+  const [selectedPositions, setSelectedPositions] = useState<string[]>([])
 
   const [showAreas, setShowAreas] = useState(false)
   const [showCategories, setShowCategories] = useState(false)
@@ -51,57 +51,43 @@ export const SavedVideos = (): JSX.Element => {
         end: number
         label: string
         zone: number
-        categories: string | string[]
+        position: string
+        hand: string
+        defended: string
         thumbnail_path?: string
       }> = await (window.api as any).loadAllCutouts()
       
       const transformed: SavedVideo[] = rows.map((r, idx) => {
         const vid = typeof r.id === 'number' ? r.id : idx
+        const durSec = r.end - r.start
+        const mm = Math.floor(durSec / 60)
+        .toString()
+        .padStart(2, '0')
+        const ss = Math.floor(durSec % 60)
+        .toString()
+        .padStart(2, '0')
         
-        let parsedCats: string[] = []
-        if (Array.isArray(r.categories)) {
-          parsedCats = r.categories
-        } else {
-          try {
-            parsedCats = JSON.parse(r.categories)
-          } catch {
-            parsedCats = []
-          }
+        const filename = r.video_path.split('/').pop() || r.video_path
+        
+        const thumbUrl = r.thumbnail_path || ''
+        
+        return {
+          id: vid,
+          title: r.label,
+          duration: `${mm}:${ss}`,
+          source: filename,
+          position: r.position || 'Unspecified',
+          hand: r.hand || 'Unspecified',
+          defended: r.defended || 'Unspecified',
+          zone: r.zone,
+          videoUrl: r.video_path,
+          thumbnail_path: thumbUrl,
+          start: r.start,
+          end: r.end
         }
-        
-      const durSec = r.end - r.start
-      const mm = Math.floor(durSec / 60)
-      .toString()
-      .padStart(2, '0')
-      const ss = Math.floor(durSec % 60)
-      .toString()
-      .padStart(2, '0')
-      
-      const filename = r.video_path.split('/').pop() || r.video_path
-      
-      const thumbUrl = r.thumbnail_path || ''
-      
-      return {
-        id: vid,
-        title: r.label,
-        duration: `${mm}:${ss}`,
-        source: filename,
-        categories: parsedCats.length > 0 ? parsedCats : ['Uncategorized'],
-        videoUrl: r.video_path,
-        thumbnail_path: thumbUrl,
-        start: r.start,
-        end: r.end,
-        zone: r.zone,
-      }
       })
       
       setCutouts(transformed)
-
-      const allCats = Array.from(
-        new Set(transformed.flatMap((v) => v.categories ?? []))
-      )
-
-      setAllCategories(allCats)
     })()
   }, [])
   
@@ -149,7 +135,6 @@ export const SavedVideos = (): JSX.Element => {
   const handleCardClick = (video: SavedVideo) => {
     setSelectedVideo(video)
     setEditedVideo({ ...video })
-    setModalCategories(video.categories ?? [])
     setShowModal(true)
   }
   
@@ -165,9 +150,8 @@ export const SavedVideos = (): JSX.Element => {
   
   const handleSaveChanges = async () => {
     if (!editedVideo) return
-    const updated = { ...editedVideo, categories: modalCategories }
     setCutouts((prev) =>
-      prev.map((v) => (v.id === updated.id ? updated : v))
+      prev.map((v) => (v.id === editedVideo.id ? editedVideo : v))
     )
     setShowModal(false)
   }
@@ -189,18 +173,6 @@ export const SavedVideos = (): JSX.Element => {
         : [...prev, cat]
     )
   }
-
-  const handleRemoveCategory = (cat: string) => {
-    setSelectedCategories((prev) => prev.filter((c) => c !== cat))
-  }
-
-  const handleAddCategory = () => {
-    const trimmed = newCategory.trim()
-    if (!trimmed) return
-    if (!allCategories.includes(trimmed)) setAllCategories((prev) => [...prev, trimmed])
-    setSelectedCategories((prev) => [...prev, trimmed])
-    setNewCategory('')
-  }
   
   const togglePlay = (videoId: string) =>
     setPlayingVideoId((prev) => (prev === videoId ? null : videoId))
@@ -220,8 +192,8 @@ export const SavedVideos = (): JSX.Element => {
     selectedZones.length === 0 || (v.zone !== undefined && selectedZones.includes(v.zone))
   )
   .filter((v) =>
-    selectedCategories.length === 0 ||
-    v.categories.some((cat) => selectedCategories.includes(cat))
+    selectedPositions.length === 0 ||
+    selectedPositions.includes(v.position)
   )
   .sort((a, b) => {
     const comparisons: number[] = []
@@ -238,10 +210,8 @@ export const SavedVideos = (): JSX.Element => {
       comparisons.push(durToSec(a.duration) - durToSec(b.duration))
     }
 
-    if (sortOptions.Category) {
-      const aCat = a.categories?.[0] || ''
-      const bCat = b.categories?.[0] || ''
-      comparisons.push(aCat.localeCompare(bCat))
+    if (sortOptions.Position) {
+       comparisons.push(a.position.localeCompare(b.position))
     }
 
     for (const cmp of comparisons) {
@@ -251,16 +221,9 @@ export const SavedVideos = (): JSX.Element => {
   })
 
   const grouped = filteredCutouts.reduce<Record<string, SavedVideo[]>>((acc, video) => {
-    const relevantCats =
-      selectedCategories.length > 0
-        ? video.categories.filter((cat) => selectedCategories.includes(cat))
-        : video.categories
-
-    relevantCats.forEach((cat) => {
-      if (!acc[cat]) acc[cat] = []
-      acc[cat].push(video)
-    })
-
+    const key = video.position || 'Unspecified'
+    if (!acc[key]) acc[key] = []
+    acc[key].push(video)
     return acc
   }, {})
 
@@ -388,9 +351,9 @@ export const SavedVideos = (): JSX.Element => {
       </div>
       
       {/* Render grouped cutouts by category */}
-      {Object.entries(grouped).map(([category, videos]) => (
-        <div key={category} className="mb-5">
-          <h5 className="mb-3">{category}</h5>
+      {Object.entries(grouped).map(([position, videos]) => (
+        <div key={position} className="mb-5">
+          <h5 className="mb-3">{position}</h5>
           <div className="d-flex flex-wrap gap-4">
             {videos.map((video) => (
               <div
@@ -512,73 +475,26 @@ export const SavedVideos = (): JSX.Element => {
                 />
               </div>
               <div className="mb-3">
-          <label className="form-label">Categories:</label>
-          <div className="dropdown w-100">
-            <button
-              type="button"
-              className="form-select text-start"
-              onClick={() => setModalCategoryDropdownOpen((prev) => !prev)}
-            >
-              {modalCategories.length > 0 ? modalCategories.join(', ') : 'Select categories'}
-            </button>
-
-            {modalCategoryDropdownOpen && (
-              <ul
-                className="dropdown-menu show px-3 py-2 w-100"
-                style={{ minWidth: '250px', display: 'block' }}
-                onClick={(e) => e.stopPropagation()} // Prevent outside click bubbling
-              >
-                {allCategories.map((cat) => (
-                  <li key={cat} className="d-flex align-items-center justify-content-between">
-                    <div className="form-check me-2">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id={`cat-${cat}`}
-                        checked={modalCategories.includes(cat)}
-                        onChange={() => {
-                          setModalCategories((prev) =>
-                            prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
-                          );
-                        }}
-                      />
-                      <label className="form-check-label ms-2" htmlFor={`cat-${cat}`}>
-                        {cat}
-                      </label>
-                    </div>
-                    <button
-                      type="button"
-                      className="btn btn-sm py-0 px-2"
-                      title="Remove category"
-                      onClick={() => handleRemoveCategory(cat)}
-                    >
-                      &minus;
-                    </button>
-                  </li>
-                ))}
-                <li><hr className="dropdown-divider" /></li>
-                <li>
-                  <div className="input-group input-group-sm">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="New category"
-                      value={newCategory}
-                      onChange={(e) => setNewCategory(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={handleAddCategory}
-                    >
-                      +
-                    </button>
-                  </div>
-                </li>
-              </ul>
-            )}
-          </div>
-        </div>
+                <label className="form-label">Shot Hand</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={editedVideo.hand}
+                  onChange={(e) => handleEditChange('hand', e.target.value)}
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Defended</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={editedVideo.defended}
+                  onChange={(e) => handleEditChange('defended', e.target.value)}
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Position</label>
+              </div>
               <div className="modal-footer d-flex justify-content-end gap-2 mt-5">
                 <button
                   type="button"

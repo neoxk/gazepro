@@ -26,15 +26,12 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
   const [post, setPost] = useState(2)
   const [label, setLabel] = useState('Snippet')
   const [zone, setZone] = useState('1')
-  const [allCategories, setAllCategories] = useState<string[]>([
-    'Reflex',
-    'Positioning',
-    'Reactions',
-  ])
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [newCategory, setNewCategory] = useState('')
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const [shotHand, setShotHand] = useState('left')
+  const [defended, setDefended] = useState('no')
+  const [position, setPosition] = useState('')
+  const allPositions = ['Left Wing', 'Right Wing', 'Center', 'Pivot', 'Back Left', 'Back Right']
 
+  const videoRef = useRef<HTMLVideoElement>(null)
   const [duration, setDuration] = useState(0)
 
   const videoName = selectedVideoPath
@@ -66,7 +63,9 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
       end:        current + post,
       label:      `${label}`,
       zone:       Number(zone),
-      categories: selectedCategories,
+      shotHand,
+      defended,
+      position,
     }
 
     const snapshotTime = newCutoutFields.start + 0.5
@@ -119,28 +118,6 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
       const rows = await window.api.loadCutouts(selectedVideoPath)
       setCutouts(rows)
     }
-  }
-
-  const handleCategoryToggle = (category: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
-    )
-  }
-
-  const handleAddCategory = () => {
-    const trimmed = newCategory.trim()
-    if (trimmed && !allCategories.includes(trimmed)) {
-      setAllCategories([...allCategories, trimmed])
-      setSelectedCategories([...selectedCategories, trimmed])
-      setNewCategory('')
-    }
-  }
-
-  const handleRemoveCategory = (category: string) => {
-    setAllCategories((prev) => prev.filter((c) => c !== category))
-    setSelectedCategories((prev) => prev.filter((c) => c !== category))
   }
 
   return (
@@ -199,7 +176,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
       {/* Cutout Form */}
       <form onSubmit={(e) => { e.preventDefault(); handleSaveCutout() }}>
         <div className="row g-3 align-items-end">
-          <div className="col-md-3">
+          <div className="col-md-5">
             <label className="form-label text-dark">Name:</label>
             <input
               className="form-control"
@@ -230,7 +207,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
               onChange={(e) => setPost(+e.target.value)}
             />
           </div>
-          <div className="col-md-5">
+          <div className="col-md-3">
             <label className="form-label">Area (1–9):</label>
             <select
               className="form-select"
@@ -244,81 +221,106 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
               ))}
             </select>
           </div>
-          <div className="col-md-10">
-            <label className="form-label">Categories:</label>
-            <div className="dropdown w-100">
-              <button
-                className="form-select text-start"
-                type="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                {selectedCategories.length > 0
-                  ? selectedCategories.join(', ')
-                  : 'Select categories'}
-              </button>
-              <ul
-                className="dropdown-menu px-3 py-2 w-100"
-                style={{ minWidth: '250px' }}
-              >
-                {allCategories.map((cat) => (
-                  <li
-                    key={cat}
-                    className="d-flex align-items-center justify-content-between"
-                  >
-                    <div className="form-check me-2">
+            <div className="col-md-5">
+              <label className="form-label">Position:</label>
+              <div className="dropdown w-100">
+                <button className="form-select text-start" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  {position || 'Select Position'}
+                </button>
+                <ul className="dropdown-menu px-3 py-2 w-100" style={{ minWidth: '250px' }}>
+                  {allPositions.map((pos) => (
+                    <li key={pos} className="mb-2">
                       <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id={`cat-${cat}`}
-                        checked={selectedCategories.includes(cat)}
-                        onChange={() => handleCategoryToggle(cat)}
+                        type="radio"
+                        className="btn-check"
+                        name="position"
+                        id={`pos-${pos}`}
+                        autoComplete="off"
+                        checked={position === pos}
+                        onChange={() => setPosition(pos)}
                       />
                       <label
-                        className="form-check-label ms-2"
-                        htmlFor={`cat-${cat}`}
+                        className="btn btn-outline-dark w-100"
+                        htmlFor={`pos-${pos}`}
                       >
-                        {cat}
+                        {pos}
                       </label>
-                    </div>
-                    <button
-                      type="button"
-                      className="btn btn-sm py-0 px-2"
-                      title="Remove category"
-                      onClick={() => handleRemoveCategory(cat)}
-                    >
-                      &minus;
-                    </button>
-                  </li>
-                ))}
-                <li>
-                  <hr className="dropdown-divider" />
-                </li>
-                <li>
-                  <div className="input-group input-group-sm">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="New category"
-                      value={newCategory}
-                      onChange={(e) => setNewCategory(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={handleAddCategory}
-                    >
-                      +
-                    </button>
-                  </div>
-                </li>
-              </ul>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div className="col-md-2">
+              <label className="form-label d-block">Shot Hand:</label>
+              <div className="d-flex gap-2">
+                <div className="w-100">
+                  <input
+                    type="radio"
+                    className="btn-check"
+                    name="hand"
+                    id="hand-left"
+                    autoComplete="off"
+                    checked={shotHand === 'left'}
+                    onChange={() => setShotHand('left')}
+                  />
+                  <label className="btn btn-outline-dark w-100" htmlFor="hand-left">
+                    Left
+                  </label>
+                </div>
+                <div className="w-100">
+                  <input
+                    type="radio"
+                    className="btn-check"
+                    name="hand"
+                    id="hand-right"
+                    autoComplete="off"
+                    checked={shotHand === 'right'}
+                    onChange={() => setShotHand('right')}
+                  />
+                  <label className="btn btn-outline-dark w-100" htmlFor="hand-right">
+                    Right
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="col-md-2">
+              <label className="form-label d-block">Was There Defence?</label>
+              <div className="d-flex gap-2">
+                <div className="w-100">
+                  <input
+                    type="radio"
+                    className="btn-check"
+                    name="defence"
+                    id="defence-yes"
+                    autoComplete="off"
+                    checked={defended === 'yes'}
+                    onChange={() => setDefended('yes')}
+                  />
+                  <label className="btn btn-outline-dark w-100" htmlFor="defence-yes">
+                    Yes
+                  </label>
+                </div>
+                <div className="w-100">
+                  <input
+                    type="radio"
+                    className="btn-check"
+                    name="defence"
+                    id="defence-no"
+                    autoComplete="off"
+                    checked={defended === 'no'}
+                    onChange={() => setDefended('no')}
+                  />
+                  <label className="btn btn-outline-dark w-100" htmlFor="defence-no">
+                    No
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-3">
+              <button className="btn btn-red-damask w-100">Save cutout</button>
             </div>
           </div>
-          <div className="col-md-2">
-            <button className="btn btn-red-damask w-100">Save cutout</button>
-          </div>
-        </div>
       </form>
     </div>
   )
