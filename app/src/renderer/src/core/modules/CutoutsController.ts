@@ -7,7 +7,9 @@ export interface CutoutRow {
   end:            number
   label:          string
   zone:           number
-  categories:     string
+  shotHand:       string
+  defended:       string
+  position:       string
   thumbnail_path: string
 }
 
@@ -15,10 +17,7 @@ class CutoutsController {
   private ts = new TSService<CutoutRow>()
 
   async save(
-    cutout: Omit<CutoutRow, "id" | "categories" | "thumbnail_path"> & {
-      categories: string[]
-      thumbnail_path: string
-    }
+    cutout: Omit<CutoutRow, "id">
   ) {
     const row = {
       video_path:     cutout.video_path,
@@ -26,7 +25,9 @@ class CutoutsController {
       end:            cutout.end,
       label:          cutout.label,
       zone:           cutout.zone,
-      categories:     JSON.stringify(cutout.categories),
+      shotHand:       cutout.shotHand,
+      defended:       cutout.defended,
+      position:       cutout.position,
       thumbnail_path: cutout.thumbnail_path,
     }
     await this.ts.insert("cutouts", row)
@@ -34,7 +35,7 @@ class CutoutsController {
 
   async loadFor(
     videoPath: string
-  ): Promise<Array<Omit<CutoutRow, "categories"> & { categories: string[] }>> {
+  ): Promise<CutoutRow[]> {
     const rows: CutoutRow[] = await this.ts.query("cutouts", {
       video_path: videoPath,
     })
@@ -45,7 +46,9 @@ class CutoutsController {
       end:            r.end,
       label:          r.label,
       zone:           r.zone,
-      categories:     JSON.parse(r.categories),
+      shotHand:       r.shotHand,
+      defended:       r.defended,
+      position:       r.position,
       thumbnail_path: r.thumbnail_path,
     }))
   }
@@ -57,6 +60,17 @@ class CutoutsController {
   async deleteById(id: number): Promise<void> {
     await this.ts.delete("cutouts", { id })
   }
+
+  public async update(
+    id: number,
+    fields: Partial<Omit<CutoutRow, 'id'>>
+  ): Promise<void> {
+    if (typeof id !== 'number') {
+      throw new Error('CutoutsController.update: `id` must be a number')
+    }
+    await this.ts.update('cutouts', { id, ...fields } as Record<string, unknown>)
+  }
+
 }
 
 export default new CutoutsController()

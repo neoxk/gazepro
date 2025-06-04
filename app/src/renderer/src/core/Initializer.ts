@@ -28,7 +28,9 @@ export default class Initializer {
       { colName: 'end',        type: 'real' },
       { colName: 'label',      type: 'text' },
       { colName: 'zone',       type: 'integer' },
-      { colName: 'categories', type: 'text' },
+      { colName: 'shotHand',   type: 'text' },
+      { colName: 'defended',   type: 'text' },
+      { colName: 'position',   type: 'text' },
       { colName: 'thumbnail_path', type: 'text' },
     ]);
 

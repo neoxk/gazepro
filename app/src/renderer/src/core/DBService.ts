@@ -52,6 +52,22 @@ class DBService {
     return (this._knex!(tableName).where(filter).del() as unknown) as number[];
 }
 
+  public async update(
+    tableName: string,
+    entry: Record<string, unknown>
+  ): Promise<void> {
+    if (!this._knex) throw new Error("init() must be called first.");
+
+    const id = entry["id"];
+    if (typeof id !== "number") {
+      throw new Error("DBService.update: `id` is required and must be a number");
+    }
+
+    delete entry["id"];
+    await this._knex(tableName).where({ id }).update(entry);
+  }
+
+
 }
 
 export default new DBService();

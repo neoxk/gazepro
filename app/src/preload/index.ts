@@ -14,9 +14,15 @@ const api = {
     end: number
     label: string
     zone: number
-    categories: string[]
+    shotHand: string
+    defended: string
+    position: string
     thumbnailDataUrl: string
   }) => ipcRenderer.invoke("cutouts:saveWithThumbnail", payload),
+  updateCutout: (id: number, fields: any) =>
+    ipcRenderer.invoke('cutout:update', id, fields) as Promise<{ success: boolean }>,
+  getFrameRate: (filePath: string) =>
+    ipcRenderer.invoke('video:getFrameRate', filePath) as Promise<{ fps: number }>,
 }
 
 if (process.contextIsolated) {
