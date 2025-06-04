@@ -24,23 +24,21 @@ export const SavedVideos = (): JSX.Element => {
   const [sortOptions, setSortOptions] = useState<Record<string, boolean>>({
     Title: false,
     Duration: false,
-    Category: false,
+    Position: false,
   })
   
   const [selectedVideo, setSelectedVideo] = useState<SavedVideo | null>(null)
   const [editedVideo, setEditedVideo] = useState<SavedVideo | null>(null)
   const [showModal, setShowModal] = useState(false)
 
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [allCategories, setAllCategories] = useState<string[]>([])
-
+  const [selectedZones, setSelectedZones] = useState<number[]>([])
   const [selectedPositions, setSelectedPositions] = useState<string[]>([])
+  const [allPositions] = useState<string[]>(['Left Wing', 'Right Wing', 'Center', 'Pivot', 'Back Left', 'Back Right'])
 
   const [showAreas, setShowAreas] = useState(false)
-  const [showCategories, setShowCategories] = useState(false)
+  const [showPositions, setShowPositions] = useState(false)
 
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedZones, setSelectedZones] = useState<number[]>([])
   
   useEffect(() => {
     ;(async () => {
@@ -165,14 +163,6 @@ export const SavedVideos = (): JSX.Element => {
       setCutouts((prev) => prev.filter((v) => v.id !== editedVideo.id))
       setShowModal(false)
   }
-
-  const handleCategoryToggle = (cat: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(cat)
-        ? prev.filter((c) => c !== cat)
-        : [...prev, cat]
-    )
-  }
   
   const togglePlay = (videoId: string) =>
     setPlayingVideoId((prev) => (prev === videoId ? null : videoId))
@@ -180,6 +170,12 @@ export const SavedVideos = (): JSX.Element => {
   const toggleZone = (zone: number) => {
     setSelectedZones((prev) =>
       prev.includes(zone) ? prev.filter((z) => z !== zone) : [...prev, zone]
+    )
+  }
+
+  const togglePosition = (pos: string) => {
+    setSelectedPositions((prev) =>
+      prev.includes(pos) ? prev.filter((p) => p !== pos) : [...prev, pos]
     )
   }
 
@@ -267,7 +263,7 @@ export const SavedVideos = (): JSX.Element => {
               onClick={(e) => {
                 e.stopPropagation()
                 setShowAreas(false)
-                setShowCategories(false)
+                setShowPositions(false)
               }}>
               <h6 className="dropdown-header">Simple Sort</h6>
               {Object.keys(sortOptions).map((option) => (
@@ -293,7 +289,7 @@ export const SavedVideos = (): JSX.Element => {
                   onClick={(e) => {
                     e.stopPropagation()
                     setShowAreas(!showAreas)
-                    setShowCategories(false)
+                    setShowPositions(false)
                   }}
                 >
                   Select Areas
@@ -322,26 +318,26 @@ export const SavedVideos = (): JSX.Element => {
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation()
-                    setShowCategories(!showCategories)
+                    setShowPositions(!showPositions)
                     setShowAreas(false)
                   }}
                 >
-                  Select Categories
+                  Select Positions
                 </button>
-                {showCategories && (
+                {showPositions && (
                   <ul className="dropdown-menu show p-2 w-100" style={{ display: 'block' }} onClick={(e) => e.stopPropagation()}>
-                    {allCategories.map((cat) => (
-                      <li key={cat} className="form-check">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          id={`filter-cat-${cat}`}
-                          checked={selectedCategories.includes(cat)}
-                          onChange={() => handleCategoryToggle(cat)}
-                        />
-                        <label className="form-check-label ms-2" htmlFor={`filter-cat-${cat}`}>{cat}</label>
-                      </li>
-                    ))}
+                    {allPositions.map((pos) => (
+                        <li key={pos} className="form-check">
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
+                            id={`position-${pos}`}
+                            checked={selectedPositions.includes(pos)}
+                            onChange={() => togglePosition(pos)}
+                          />
+                          <label className="form-check-label ms-2" htmlFor={`position-${pos}`}>{pos}</label>
+                        </li>
+                      ))}
                   </ul> 
                 )}
               </div>
@@ -350,7 +346,7 @@ export const SavedVideos = (): JSX.Element => {
         </div>
       </div>
       
-      {/* Render grouped cutouts by category */}
+      {/* Render grouped cutouts by position */}
       {Object.entries(grouped).map(([position, videos]) => (
         <div key={position} className="mb-5">
           <h5 className="mb-3">{position}</h5>
@@ -476,24 +472,85 @@ export const SavedVideos = (): JSX.Element => {
               </div>
               <div className="mb-3">
                 <label className="form-label">Shot Hand</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  value={editedVideo.hand}
-                  onChange={(e) => handleEditChange('hand', e.target.value)}
-                />
+                  <div className="d-flex gap-2">
+                    {['left', 'right'].map((hand) => (
+                      <div className="w-100" key={hand}>
+                        <input
+                          type="radio"
+                          className="btn-check"
+                          name="modal-hand"
+                          id={`modal-hand-${hand}`}
+                          autoComplete="off"
+                          checked={editedVideo.hand === hand}
+                          onChange={() => handleEditChange('hand', hand)}
+                        />
+                        <label
+                          className="btn btn-outline-dark w-100"
+                          htmlFor={`modal-hand-${hand}`}
+                        >
+                          {hand.charAt(0).toUpperCase() + hand.slice(1)}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
               </div>
-              <div className="mb-3">
-                <label className="form-label">Defended</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  value={editedVideo.defended}
-                  onChange={(e) => handleEditChange('defended', e.target.value)}
-                />
-              </div>
+                <div className="mb-3">
+                  <label className="form-label">Was there defence?</label>
+                  <div className="d-flex gap-2">
+                    {['yes', 'no'].map((val) => (
+                      <div className="w-100" key={val}>
+                        <input
+                          type="radio"
+                          className="btn-check"
+                          name="modal-defended"
+                          id={`modal-def-${val}`}
+                          autoComplete="off"
+                          checked={editedVideo.defended === val}
+                          onChange={() => handleEditChange('defended', val)}
+                        />
+                        <label
+                          className="btn btn-outline-dark w-100"
+                          htmlFor={`modal-def-${val}`}
+                        >
+                          {val.charAt(0).toUpperCase() + val.slice(1)}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               <div className="mb-3">
                 <label className="form-label">Position</label>
+                <div className="dropdown w-100">
+                  <button
+                    className="form-select text-start"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    {editedVideo.position || 'Select Position'}
+                  </button>
+                  <ul className="dropdown-menu px-3 py-2 w-100" style={{ minWidth: '250px' }}>
+                    {allPositions.map((pos) => (
+                      <li key={pos} className="mb-2">
+                        <input
+                          type="radio"
+                          className="btn-check"
+                          name="modal-position"
+                          id={`modal-pos-${pos}`}
+                          autoComplete="off"
+                          checked={editedVideo.position === pos}
+                          onChange={() => handleEditChange('position', pos)}
+                        />
+                        <label
+                          className="btn btn-outline-dark w-100"
+                          htmlFor={`modal-pos-${pos}`}
+                        >
+                          {pos}
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
               <div className="modal-footer d-flex justify-content-end gap-2 mt-5">
                 <button

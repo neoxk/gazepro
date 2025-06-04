@@ -63,9 +63,9 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
       end:        current + post,
       label:      `${label}`,
       zone:       Number(zone),
-      shotHand,
-      defended,
-      position,
+      shotHand:   shotHand,
+      defended:   defended,
+      position:   position,
     }
 
     const snapshotTime = newCutoutFields.start + 0.5
