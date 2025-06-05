@@ -17,7 +17,7 @@ interface ResponseEntry {
     actual: number
     label: string
     series: number
-    category: string
+    position: string
 }
 
 interface StatsProps {
@@ -71,7 +71,7 @@ export const Statistics = ({ responses }: StatsProps) : JSX.Element => {
 
                 return (
                     <div key={seriesNum} className="col-md-6 my-4">
-                        <h5 className="text-center">Series {seriesNum} – {group[0].category}</h5>
+                        <h5 className="text-center">Series {seriesNum} – {group[0].position}</h5>
                         <div style={{ maxWidth: '700px', margin: 'auto' }}>
                             <Bar
                                 data={{

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import handballMan from '@renderer/assets/images/handball-man.svg'
 import { Statistics } from './Statistics'
+
+import handballMan from '@renderer/assets/images/handball-man.svg'
 
 interface CutoutRow {
   video_path: string
@@ -8,11 +9,20 @@ interface CutoutRow {
   end: number
   label: string
   zone: number
-  categories: string[]
+  position: string
+  hand: string
+  defended: string
+}
+
+interface SeriesFilter {
+  zones: number[]
+  positions: string[]
+  hands: string[]
+  defences: string[]
 }
 
 export const Training = () => {
-  const [seriesCount, setSeriesCount] = useState(3)
+  const [seriesFilters, setSeriesFilters] = useState<SeriesFilter[]>([])
   const [clipsPerSeries, setClipsPerSeries] = useState(5)
   const [speed, setSpeed] = useState(1)
   const [pauseBetweenClips, setPauseBetweenClips] = useState(2)
@@ -21,12 +31,34 @@ export const Training = () => {
   const [cutouts, setCutouts] = useState<CutoutRow[]>([])
   const [currentZone, setCurrentZone] = useState<number | null>(null)
   const [responseZone, setResponseZone] = useState<number | null>(null)
-  const [responses, setResponses] = useState<Array<{ expected: number; actual: number; label: string; series: number; category: string }>>([])
+  const [responses, setResponses] = useState<Array<{ expected: number; actual: number; label: string; series: number; position: string }>>([])
 
-  const allCategories = ['Reflex', 'Positioning', 'Reactions']
-  const [seriesCategories, setSeriesCategories] = useState<string[]>(
-    Array(seriesCount).fill('')
-  )
+  const allPositions = ['Left Wing', 'Right Wing', 'Center', 'Pivot', 'Back Left', 'Back Right']
+  const allHands = ['Left', 'Right']
+  const allDefences = ['Yes', 'No']
+
+  const addSeries = () => {
+      setSeriesFilters([...seriesFilters, { zones: [], positions: [], hands: [], defences: [] }])
+    }
+
+  const removeSeries = (index: number) => {
+    setSeriesFilters(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const getDropdownText = (arr: string[] | number[], placeholder: string) => {
+    return arr.length > 0 ? arr.join(', ') : placeholder
+  }
+
+  const toggleFilter = <T,>(arr: T[], value: T): T[] =>
+    arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value]
+
+  const updateFilter = (index: number, field: keyof SeriesFilter, value: any) => {
+    setSeriesFilters((prev) => {
+      const copy = [...prev]
+      copy[index] = { ...copy[index], [field]: toggleFilter(copy[index][field], value) }
+      return copy
+    })
+  }
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -48,23 +80,6 @@ export const Training = () => {
   const videoRef = useRef<HTMLVideoElement>(null)
   const videoContainerRef = useRef<HTMLDivElement>(null)
 
-  const updateSeriesCount = (n: number) => {
-    setSeriesCount(n)
-    setSeriesCategories((cats) =>
-      Array(n)
-        .fill('')
-        .map((_, i) => cats[i] || '')
-    )
-  }
-
-  const handleCategoryChange = (idx: number, cat: string) => {
-    setSeriesCategories((cats) => {
-      const copy = [...cats]
-      copy[idx] = cat
-      return copy
-    })
-  }
-
   const shuffle = <T,>(arr: T[]): T[] => {
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
@@ -77,9 +92,22 @@ export const Training = () => {
     const sequence: Array<{ url: string; start: number; end: number } | { delay: number }> =
       []
 
-    for (let s = 0; s < seriesCount; s++) {
-      const cat = seriesCategories[s]
-      const matching = cutouts.filter((c) => c.categories.includes(cat))
+
+
+    for (let s = 0; s < seriesFilters.length; s++) {
+      const { zones, positions, hands, defences } = seriesFilters[s]
+
+          console.log('Hands filter:', hands);
+console.log('Cutouts sample:', cutouts.slice(0, 5).map(c => c.hand));
+
+
+      const matching = cutouts.filter((c) =>
+        (zones.length === 0 || zones.includes(c.zone)) &&
+        (positions.length === 0 || positions.includes(c.position)) &&
+        (hands.length === 0 || hands.map(h => h.toLowerCase()).includes(c.hand.toLowerCase())) &&
+        (defences.length === 0 || defences.map(d => d.toLowerCase()).includes(c.defended.toLowerCase()))
+      )
+
       const picks = shuffle([...matching]).slice(0, clipsPerSeries)
 
       picks.forEach((c, idx) => {
@@ -89,7 +117,7 @@ export const Training = () => {
         }
       })
 
-      if (s < seriesCount - 1) {
+      if (s < seriesFilters.length - 1) {
         sequence.push({ delay: pauseBetweenSeries })
       }
     }
@@ -146,11 +174,8 @@ export const Training = () => {
   const recordResponse = () => {
     if (currentZone !== null && responseZone !== null) {
       const label = videoRef.current?.getAttribute('data-label') ?? ''
-      const matched = cutouts.find(c => c.label === label)
 
-      const seriesIdx = seriesCategories.findIndex(cat =>
-        matched?.categories.includes(cat)
-      )
+      const seriesIdx = seriesFilters.findIndex((_, i) => i === currentZone - 1)
 
       setResponses((prev) => [
         ...prev,
@@ -159,7 +184,7 @@ export const Training = () => {
           actual: responseZone,
           label,
           series: seriesIdx + 1,
-          category: seriesCategories[seriesIdx],
+          position: allPositions[seriesIdx],
         },
       ])
       setResponseZone(null)
@@ -167,14 +192,20 @@ export const Training = () => {
   }
 
   const handleStart = async () => {
-    if (seriesCategories.some((c) => !c)) {
-      alert('Please select a category for every series')
+    if (seriesFilters.length === 0) {
+      alert('Please add at least one series')
       return
     }
 
     const cutouts: CutoutRow[] = await (window.api as any).loadAllCutouts()
     setCutouts(cutouts)
-    const seq = buildSequence(cutouts)
+    const seq = buildSequence(cutouts);
+
+    const hasClips = seq.some(item => 'url' in item);
+    if (!hasClips) {
+      alert('No matching clips found for the selected filters.');
+      return;
+    }
 
     setStarted(true)
     setTimeout(() => {
@@ -197,17 +228,7 @@ export const Training = () => {
       <h2 className="mb-3 text-dark">Training Module</h2>
 
       <form onSubmit={(e) => e.preventDefault()}>
-        <div className="row g-3 mb-4">
-          <div className="col-md-2">
-            <label>Series</label>
-            <input
-              type="number"
-              className="form-control"
-              value={seriesCount}
-              min={1}
-              onChange={(e) => updateSeriesCount(+e.target.value)}
-            />
-          </div>
+        <div className="row mb-4">
           <div className="col-md-2">
             <label>Clips/Series</label>
             <input
@@ -250,27 +271,130 @@ export const Training = () => {
               onChange={(e) => setPauseBetweenSeries(+e.target.value)}
             />
           </div>
+          <div className="col-md-2">
+            <br />
+            <button className="btn btn-outline-red-damask mb-3 w-100" onClick={addSeries}>
+              Add Series
+            </button>
+          </div>
         </div>
 
-        <div className="row mb-4">
-          {Array.from({ length: seriesCount }).map((_, idx) => (
-            <div className="col-md-4 mb-3" key={idx}>
-              <label>Series {idx + 1} Category</label>
-              <select
-                className="form-select"
-                value={seriesCategories[idx] || ''}
-                onChange={(e) => handleCategoryChange(idx, e.target.value)}
-              >
-                <option value="">Select…</option>
-                {allCategories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
+        {seriesFilters.map((filter, idx) => (
+          <div key={idx} className="card p-3 mb-4 position-relative">
+            <button
+              type="button"
+              className="btn-close position-absolute end-0 top-0 m-3"
+              aria-label="Close"
+              onClick={() => removeSeries(idx)}
+            ></button>
+            <h5 className="mb-3">Series {idx + 1}</h5>
+            <div className="row align-items-end">
+              <div className="col-md-6">
+                <label className="form-label">Position:</label>
+                <div className="dropdown w-100">
+                  <button
+                    className="form-select text-start"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    {getDropdownText(filter.positions, 'Select Position(s)')}
+                  </button>
+                  <ul
+                    className="dropdown-menu px-3 py-2 w-100"
+                    style={{ minWidth: '250px' }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {allPositions.map((pos) => (
+                      <li key={pos} className="mb-2">
+                        <input
+                          type="checkbox"
+                          className="btn-check"
+                          id={`position-${idx}-${pos}`}
+                          autoComplete="off"
+                          checked={filter.positions.includes(pos)}
+                          onChange={() => updateFilter(idx, 'positions', pos)}
+                        />
+                        <label className="btn btn-outline-dark w-100" htmlFor={`position-${idx}-${pos}`}>{pos}</label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <label className="form-label">Area:</label>
+                <div className="dropdown w-100">
+                  <button
+                    className="form-select text-start"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    {getDropdownText(filter.zones, 'Select Area(s)')}
+                  </button>
+                  <ul
+                    className="dropdown-menu px-3 py-2 w-100"
+                    style={{ minWidth: '250px' }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {Array.from({ length: 9 }, (_, i) => i + 1).map((zone) => (
+                      <li key={zone} className="mb-2">
+                        <input
+                          type="checkbox"
+                          className="btn-check"
+                          id={`zone-${idx}-${zone}`}
+                          autoComplete="off"
+                          checked={filter.zones.includes(zone)}
+                          onChange={() => updateFilter(idx, 'zones', zone)}
+                        />
+                        <label className="btn btn-outline-dark w-100" htmlFor={`zone-${idx}-${zone}`}>{zone}</label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="col-md-6 mt-3">
+                <label className="form-label d-block">Shot Hand:</label>
+                <div className="d-flex gap-2">
+                  {allHands.map((hand) => (
+                    <div className="w-100" key={hand}>
+                      <input
+                        type="checkbox"
+                        className="btn-check"
+                        id={`hand-${idx}-${hand}`}
+                        autoComplete="off"
+                        checked={filter.hands.includes(hand)}
+                        onChange={() => updateFilter(idx, 'hands', hand)}
+                      />
+                      <label className="btn btn-outline-dark w-100" htmlFor={`hand-${idx}-${hand}`}>{hand}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="col-md-6 mt-3">
+                <label className="form-label d-block">Was There Defence?</label>
+                <div className="d-flex gap-2">
+                  {allDefences.map((d) => (
+                    <div className="w-100" key={d}>
+                      <input
+                        type="checkbox"
+                        className="btn-check"
+                        id={`def-${idx}-${d}`}
+                        autoComplete="off"
+                        checked={filter.defences.includes(d)}
+                        onChange={() => updateFilter(idx, 'defences', d)}
+                      />
+                      <label className="btn btn-outline-dark w-100" htmlFor={`def-${idx}-${d}`}>{d}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
 
         <div className="row mb-4">
           <div className="col-md-6">
@@ -286,7 +410,7 @@ export const Training = () => {
           <div className="col-md-6">
             <button
               type="button"
-              className="btn btn-secondary w-100"
+              className="btn btn-outline-dark w-100"
               onClick={handleRestart}
             >
               Restart
