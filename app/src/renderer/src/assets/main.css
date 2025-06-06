@@ -146,12 +146,12 @@
 }
 
 .app-scroll-bar::-webkit-scrollbar-thumb {
-  background-color: #e36443;
+  background-color: var(--red-damask);
   border-radius: 8px;
 }
 
 .app-scroll-bar::-webkit-scrollbar-thumb:hover {
-  background-color: #c74e2d;
+  background-color: var(--red-damask-darker);
 }
 
 .truncate-text {
@@ -160,4 +160,21 @@
   white-space: nowrap;
   flex-grow: 1;
   min-width: 0;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  background-color: var(--red-damask)
+}
+
+input[type='range']::-moz-range-thumb {
+  background-color: var(--red-damask)
+}
+
+input[type='range']::-webkit-slider-thumb {
+  background-color: #e44d26;
+  border-radius: 50%;
+  border: none;
+  height: 16px;
+  width: 16px;
+  cursor: pointer;
 }
