@@ -10,10 +10,12 @@ const playerAPI = {
     ipcRenderer.on(trainChannel.PLAY , (_evt,path, from, to, speed)=>cb(path, from, to, speed)),
   onPause: (callback) => ipcRenderer.on(trainChannel.PAUSE, (_evt) => callback()) ,
   onResume: (cb) => ipcRenderer.on(trainChannel.RESUME, (_evt) => cb()),
-  onDelay: (cb) => ipcRenderer.on(trainChannel.DELAY, (_evt) => cb()),
+  onDelay: (cb: (seconds: number) => void) => ipcRenderer.on(trainChannel.DELAY, (_evt, seconds) => cb(seconds)),
+
+  isFullscreen: () => ipcRenderer.invoke(trainChannel.IS_FULLSCREEN),
 
   notifyLoaded: () => ipcRenderer.send(trainChannel.SCREEN_LOADED),
-  notifyFinished: () => ipcRenderer.send(trainChannel.CLIP_FINISHED)
+  notifyFinished: () => ipcRenderer.send(trainChannel.CLIP_FINISHED),
 }
 
 

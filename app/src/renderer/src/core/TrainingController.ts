@@ -1,3 +1,4 @@
+import { ciIncludes } from "./util"
 
 interface Filter {
   zones: number[]
@@ -23,7 +24,7 @@ interface CutoutRow {
   label: string
   zone: number
   position: string
-  hand: string
+  shotHand: string
   defended: string
 }
 
@@ -60,13 +61,18 @@ class TrainingController {
     this.delays = delays
     this.speed = speed
 
-    this.trainAPI.onClipFinished(this.playClip)
+    this.playClip = this.playClip.bind(this)
+    this.trainAPI.onClipFinished(() => {
+      console.log("clip finished playing + starting new cutout")
+      this.playClip()
+    })
   }
 
   public startTraining() {
     this.filterCutouts()
     this.buildSequence()
 
+    this.playClip = this.playClip.bind(this)
     this.trainAPI.onScreenLoaded(this.playClip)
     this.trainAPI.loadScreen()
   }
@@ -98,77 +104,92 @@ class TrainingController {
 
   private filterCutouts() {
     for (const [seriesIndex, filter] of this.filters.entries()) {
+  
+      this.filteredCutouts[seriesIndex] = this.filteredCutouts[seriesIndex] ?? [];
+      console.log(this.filters)
+  
+      for (const cutout of [...this.cutouts]) {
+       
+        if (this.filteredCutouts[seriesIndex].length >= this.series[seriesIndex]) break;
 
-      for (const [cutoutIndex, cutout] of this.cutouts.entries()) {
         if (
-          cutout.defended in filter.defences &&
-          cutout.position in filter.positions &&
-          cutout.hand in filter.hands &&
-          cutout.zone in filter.zones
+          ciIncludes(filter.defences, cutout.defended) &&
+          ciIncludes(filter.positions, cutout.position) &&
+          ciIncludes(filter.hands,    cutout.shotHand) &&
+          filter.zones.includes(cutout.zone)
         ) {
-          this.filteredCutouts[seriesIndex].push(cutout)
-          this.cutouts.splice(cutoutIndex, 1)
+          this.filteredCutouts[seriesIndex].push(cutout);
+          this.cutouts.splice(this.cutouts.indexOf(cutout), 1);
         }
-
         if (this.filteredCutouts[seriesIndex].length >= this.series[seriesIndex]) break;
       }
     }
+
   }
 
   private buildSequence() {
-    this.trainingSequence[0].push({delay: 5}) //initial delay
-
-    for (const [seriesIndex, cutouts] of this.filteredCutouts.entries()) {
-
-      for (const cutout of cutouts) {
-        this.trainingSequence[seriesIndex].push(cutout)
-        this.trainingSequence[seriesIndex].push({delay: this.delays.betweenClips})
+    this.trainingSequence = Array.from({ length: this.series.length }, () => []);
+    this.trainingSequence[0].push({ delay: 5 });
+  
+    for (const [i, cutouts] of this.filteredCutouts.entries()) {
+      for (const c of cutouts) {
+        this.trainingSequence[i].push(c, { delay: this.delays.betweenClips });
       }
-
-      let calculatedBetweenSeriesDelay = this.delays[seriesIndex].betweenSeries - this.delays.betweenClips 
-      this.trainingSequence[seriesIndex].push({
-        delay:  calculatedBetweenSeriesDelay > 0 ? calculatedBetweenSeriesDelay : this.delays.betweenClips
-      })
+      const gap = Math.max(
+        0,
+        this.delays.betweenSeries - this.delays.betweenClips
+      );
+      this.trainingSequence[i].push({ delay: gap });
     }
+
   }
 
-  private advanceClip() {
-    if (!this.currentCutoutIndex && !this.currentSeriesIndex) {
-      this.currentCutoutIndex = 0
-      this.currentSeriesIndex = 0
+  private advanceClip = (): boolean => {
+    if (this.currentSeriesIndex == null) {
+      if (this.trainingSequence.length === 0) return false;          
+      this.currentSeriesIndex = 0;
+      this.currentCutoutIndex = 0;
+      return true;
+    }
+  
+    const lastSeriesIdx = this.trainingSequence.length - 1;
+    const lastCutoutIdxInCur =
+      (this.trainingSequence[this.currentSeriesIndex]?.length ?? 0) - 1;
+  
+    if (this.currentCutoutIndex! >= lastCutoutIdxInCur) {
+      if (this.currentSeriesIndex >= lastSeriesIdx) {
+        return false;
+      }
+
+      this.currentSeriesIndex++;
+      this.currentCutoutIndex = 0;
     } else {
-      let currentCutoutIndex = this.currentCutoutIndex!
-      let currentSeriesIndex = this.currentSeriesIndex!
+      this.currentCutoutIndex!++;
+    }
+    return true;
+  };
 
-      if (currentCutoutIndex == this.series[currentSeriesIndex]) {
-        currentSeriesIndex++
-        currentCutoutIndex = 0
-      } else {
-        currentCutoutIndex++
-      }
 
-      this.currentCutoutIndex = currentCutoutIndex
-      this.currentSeriesIndex = currentSeriesIndex
+  private playClip = () => {
+    if (this.isPaused) return;
+  
+    if(!this.advanceClip()) return this.trainAPI.exit()
+  
+    const cur =
+      this.trainingSequence[this.currentSeriesIndex!][this.currentCutoutIndex!];
+
+    if (!cur) {
+      return this.trainAPI.exit();
     }
 
-
-
-  }
-
-  private playClip() {
-    if (this.isPaused) return 0; 
-
-    this.advanceClip()    
-
-    let currentCutout = this.filterCutouts[this.currentSeriesIndex!][this.currentCutoutIndex!]
-
-    if ('delay' in currentCutout) return this.trainAPI.delay(currentCutout.delay)
-
-    this.trainAPI.play(
-      currentCutout.video_path, currentCutout.start, currentCutout.end, this.speed
-    )
-
-  }
+  
+    
+    if ("delay" in cur) {
+      return this.trainAPI.delay(cur.delay);
+    }
+ 
+    this.trainAPI.play(cur.video_path, cur.start, cur.end, this.speed);
+  };
 
 
 }

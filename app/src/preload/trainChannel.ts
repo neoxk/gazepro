@@ -7,7 +7,9 @@ const trainChannel = {
   DELAY: 'delay',
 
   SCREEN_LOADED: 'loaded',
-  CLIP_FINISHED: 'finished' 
+  CLIP_FINISHED: 'finished', 
+
+  IS_FULLSCREEN: 'isfs'
 }
 
 export default trainChannel

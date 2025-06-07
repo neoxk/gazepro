@@ -6,4 +6,8 @@ const shuffle = <T,>(arr: T[]): T[] => {
     return arr
   }
 
-export {shuffle}
+const ciIncludes = (arr: string[], val: string): boolean =>
+  arr.some(v => v.localeCompare(val, undefined, { sensitivity: 'accent' }) === 0);
+
+
+export {shuffle, ciIncludes}

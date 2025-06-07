@@ -11,7 +11,7 @@ interface cutoutrow {
   label: string
   zone: number
   position: string
-  hand: string
+  shotHand: string
   defended: string
 }
 
@@ -32,18 +32,20 @@ export const Training = () => {
   const [cutouts, setCutouts] = useState<cutoutrow[]>([])
   const [currentZone, setCurrentZone] = useState<number | null>(null)
   const [responseZone, setResponseZone] = useState<number | null>(null)
-  const [responses, setResponses] = useState<Array<{ expected: number; actual: number; label: string; series: number; position: string }>>([])
+  const [responses, setResponses] = useState<
+    Array<{ expected: number; actual: number; label: string; series: number; position: string }>
+  >([])
 
   const allPositions = ['Left Wing', 'Right Wing', 'Center', 'Pivot', 'Back Left', 'Back Right']
   const allHands = ['Left', 'Right']
   const allDefences = ['Yes', 'No']
 
   const addSeries = () => {
-      setSeriesFilters([...seriesFilters, { zones: [], positions: [], hands: [], defences: [] }])
-    }
+    setSeriesFilters([...seriesFilters, { zones: [], positions: [], hands: [], defences: [] }])
+  }
 
   const removeSeries = (index: number) => {
-    setSeriesFilters(prev => prev.filter((_, i) => i !== index))
+    setSeriesFilters((prev) => prev.filter((_, i) => i !== index))
   }
 
   const getDropdownText = (arr: string[] | number[], placeholder: string) => {
@@ -62,6 +64,10 @@ export const Training = () => {
   }
 
   useEffect(() => {
+    ;(window as any).api.loadAllCutouts().then((cutouts) => setCutouts(cutouts))
+  }, [])
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!started || currentZone === null) return
 
@@ -73,12 +79,9 @@ export const Training = () => {
       }
     }
 
-
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-
   }, [started, currentZone, responseZone])
-
 
   function handleStart() {
     let seriesArray: number[] = []
@@ -89,18 +92,14 @@ export const Training = () => {
       cutouts,
       seriesFilters,
       seriesArray,
-      {betweenClips: pauseBetweenClips, betweenSeries: pauseBetweenSeries},
+      { betweenClips: pauseBetweenClips, betweenSeries: pauseBetweenSeries },
       speed
     )
 
     trainingController.startTraining()
   }
 
-  
-
-
   const handleRestart = () => {
-    // setStarted(false)
     if (document.fullscreenElement) {
       document.exitFullscreen().catch(() => {})
     }
@@ -199,7 +198,12 @@ export const Training = () => {
                           checked={filter.positions.includes(pos)}
                           onChange={() => updateFilter(idx, 'positions', pos)}
                         />
-                        <label className="btn btn-outline-dark w-100" htmlFor={`position-${idx}-${pos}`}>{pos}</label>
+                        <label
+                          className="btn btn-outline-dark w-100"
+                          htmlFor={`position-${idx}-${pos}`}
+                        >
+                          {pos}
+                        </label>
                       </li>
                     ))}
                   </ul>
@@ -232,7 +236,12 @@ export const Training = () => {
                           checked={filter.zones.includes(zone)}
                           onChange={() => updateFilter(idx, 'zones', zone)}
                         />
-                        <label className="btn btn-outline-dark w-100" htmlFor={`zone-${idx}-${zone}`}>{zone}</label>
+                        <label
+                          className="btn btn-outline-dark w-100"
+                          htmlFor={`zone-${idx}-${zone}`}
+                        >
+                          {zone}
+                        </label>
                       </li>
                     ))}
                   </ul>
@@ -252,7 +261,9 @@ export const Training = () => {
                         checked={filter.hands.includes(hand)}
                         onChange={() => updateFilter(idx, 'hands', hand)}
                       />
-                      <label className="btn btn-outline-dark w-100" htmlFor={`hand-${idx}-${hand}`}>{hand}</label>
+                      <label className="btn btn-outline-dark w-100" htmlFor={`hand-${idx}-${hand}`}>
+                        {hand}
+                      </label>
                     </div>
                   ))}
                 </div>
@@ -271,7 +282,9 @@ export const Training = () => {
                         checked={filter.defences.includes(d)}
                         onChange={() => updateFilter(idx, 'defences', d)}
                       />
-                      <label className="btn btn-outline-dark w-100" htmlFor={`def-${idx}-${d}`}>{d}</label>
+                      <label className="btn btn-outline-dark w-100" htmlFor={`def-${idx}-${d}`}>
+                        {d}
+                      </label>
                     </div>
                   ))}
                 </div>
@@ -292,16 +305,11 @@ export const Training = () => {
             </button>
           </div>
           <div className="col-md-6">
-            <button
-              type="button"
-              className="btn btn-outline-dark w-100"
-              onClick={handleRestart}
-            >
+            <button type="button" className="btn btn-outline-dark w-100" onClick={handleRestart}>
               Restart
             </button>
           </div>
         </div>
-
       </form>
     </div>
   )

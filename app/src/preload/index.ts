@@ -7,7 +7,7 @@ const trainAPI = {
   play: (vid_path: string, from: number, to: number, speed: number) => ipcRenderer.send(trainChannel.PLAY, vid_path, from, to, speed),
   pause: () => ipcRenderer.send(trainChannel.PAUSE),
   exit: () => ipcRenderer.send(trainChannel.EXIT),
-  delay: (seconds: number) => ipcRenderer.send(trainChannel.DELAY),
+  delay: (seconds: number) => ipcRenderer.send(trainChannel.DELAY, seconds),
 
   onScreenLoaded: (cb) => ipcRenderer.on(trainChannel.SCREEN_LOADED, (_evt) => cb()),
   onClipFinished: (cb) => ipcRenderer.on(trainChannel.CLIP_FINISHED, (_evt) => cb())
@@ -35,6 +35,7 @@ const api = {
     ipcRenderer.invoke('cutout:update', id, fields) as Promise<{ success: boolean }>,
   getFrameRate: (filePath: string) =>
     ipcRenderer.invoke('video:getFrameRate', filePath) as Promise<{ fps: number }>,
+  log: (msg: string) => ipcRenderer.send('log', msg)
 }
 
 if (process.contextIsolated) {

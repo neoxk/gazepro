@@ -58,25 +58,25 @@ app.whenReady().then(() => {
 
   let trainWin: BrowserWindow
 
+  const primaryDisplay = screen.getPrimaryDisplay()
+  let extDisplay = screen.getAllDisplays().find(display => display.id != primaryDisplay.id)
+
+  let fullscreen = true 
+  if (!extDisplay) {
+    extDisplay = primaryDisplay
+    fullscreen = false 
+  }
+
   /* TRAIN SCREEN COMMUNICATION -- MAIN -> TRAIN
       -------------------------
   */
 
       ipcMain.on(trainChannel.LOAD_SCREEN, (_evt) => {
-        const primaryDisplay = screen.getPrimaryDisplay()
-        let extDisplay = screen.getAllDisplays().find(display => display.id != primaryDisplay.id)
 
-        let fullscreen = true 
-        if (!extDisplay) {
-          extDisplay = primaryDisplay
-          fullscreen = false 
-        }
-        
         trainWin = new BrowserWindow({
           x: extDisplay.bounds.x, y: extDisplay.bounds.y,
           width: 600, height: 450,
           frame: false,
-          fullscreen: fullscreen,
           show: false,
           webPreferences: {
             preload: join(__dirname, '../preload/train.js'),
@@ -89,6 +89,10 @@ app.whenReady().then(() => {
 
       trainWin.on('ready-to-show', () => trainWin.show())
       
+      })
+
+      ipcMain.handle(trainChannel.IS_FULLSCREEN, () => {
+        return fullscreen
       })
 
       ipcMain.on(trainChannel.PLAY, (_evt, vid_path: string, from: number, to: number, speed: number) => {
@@ -108,6 +112,7 @@ app.whenReady().then(() => {
       })
 
       ipcMain.on(trainChannel.DELAY, (_evt, seconds: number) => {
+        console.log('main process delay: ' + seconds)
         trainWin.webContents.send(trainChannel.DELAY, seconds)
       })
 
@@ -125,6 +130,9 @@ app.whenReady().then(() => {
   // ------------------
 
 
+  ipcMain.on('log', (_evt, msg) => {
+    console.log(msg)
+  })
 
   ipcMain.handle('dialog:openFolder', async () => {
     const result = await dialog.showOpenDialog({
