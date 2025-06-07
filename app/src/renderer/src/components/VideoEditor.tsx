@@ -246,7 +246,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
             src={selectedVideoPath}
             className="w-100 border rounded"
             onLoadedMetadata={onLoadedMetadata}
-            controls={false} // Disable native controls
+            controls={false}
           />
         ) : (
           <div className="w-100 border border-secondary rounded bg-light text-center py-5">

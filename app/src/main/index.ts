@@ -14,7 +14,6 @@ import Const from '../renderer/src/core/const'
 import CutoutsController, { CutoutRow } from '../renderer/src/core/modules/CutoutsController'
 
 import trainChannel from '../preload/trainChannel'
-import { StringDecoder } from 'string_decoder'
 
 ffmpeg.setFfprobePath(ffprobeStatic.path)
 
@@ -35,6 +34,9 @@ function createWindow(): void {
       sandbox: false
     }
   })
+
+  mainWindow.setMenu(null);
+	mainWindow.setMenuBarVisibility(false);
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()

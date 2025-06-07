@@ -92,7 +92,7 @@
 }
 
 .handball-man {
-  width: 125%;
+  width: 110%;
   max-width: none;
   object-fit: cover;
   object-position: left top;
@@ -177,4 +177,15 @@ input[type='range']::-webkit-slider-thumb {
   height: 16px;
   width: 16px;
   cursor: pointer;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

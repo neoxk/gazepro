@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import logo from '@renderer/assets/images/logo-placeholder.png';
+import logo from '@renderer/assets/images/logo-2.png';
 import usFlag from '@renderer/assets/images/us.png';
 import siFlag from '@renderer/assets/images/si.png';
 
@@ -39,8 +39,8 @@ export const NavBar = () => {
 
         {/* Left: Brand */}
         <div className="d-flex align-items-center gap-2">
-          <img src={logo} alt="Logo" width={32} height={32} />
-          <span className="navbar-brand mb-0 h1 text-white fs-4">GazePro</span>
+          <img src={logo} alt="Logo" width={40} />
+          <span className="navbar-brand mb-0 ms-1 h1 text-white fs-5"><span>GazePro</span> Reflex Training</span>
         </div>
 
         {/* Center: Navigation Links */}

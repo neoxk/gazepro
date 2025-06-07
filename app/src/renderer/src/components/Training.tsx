@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 
 import handballMan from '@renderer/assets/images/handball-man.svg'
 import TrainingController from '../core/TrainingController'
-import { ipcMain } from 'electron'
 import { Statistics } from './Statistics'
+import { Alert } from './Alert'
 
 interface cutoutrow {
   video_path: string
@@ -36,8 +36,14 @@ export const Training = () => {
   const [responses, setResponses] = useState<
     Array<{ expected: number; actual: number; label: string; series: number; position: string }>
   >([])
+  const [alert, setAlert] = useState<{
+      id: number
+      message: string
+      type?: 'danger' | 'info' | 'success' | 'warning'
+    } | null>(null)
 
   const [showStats, setShowStats] = useState(false)
+  const [isPaused, setIsPaused] = useState(true)
 
   const allPositions = ['Left Wing', 'Right Wing', 'Center', 'Pivot', 'Back Left', 'Back Right']
   const allHands = ['Left', 'Right']
@@ -79,6 +85,13 @@ export const Training = () => {
       }
 
       if (e.key === 'Enter' && responseZone !== null) {
+        setResponses((prev) => {
+          const copy = [...prev]
+          copy[copy.length - 1].actual = responseZone
+          return copy
+        })
+        setResponseZone(null)
+        setCurrentZone(null)
       }
     }
 
@@ -87,6 +100,17 @@ export const Training = () => {
   }, [started, currentZone, responseZone])
 
   function handleStart() {
+
+    if (seriesFilters.length === 0) {
+      setAlert({
+        id: Date.now(),
+        message: 'Please add at least one series!',
+        type: 'danger',
+      })
+
+      return
+    }
+
     let seriesArray: number[] = []
     for (let i = 0; i < seriesFilters.length; i++) seriesArray.push(clipsPerSeries)
 
@@ -340,6 +364,57 @@ export const Training = () => {
         </div>
       </form>
 
+
+      {started && (
+        <div className="d-flex justify-content-center align-items-center my-5">
+          <button className="btn btn-outline-dark border-0 px-4" onClick={() => (window as any).trainAPI.previousSeries()}>Previous Series</button>
+          <button className="btn btn-outline-dark border-0 px-4" onClick={() => (window as any).trainAPI.previousClip()}>Previous Clip</button>
+
+          <button
+            type="button"
+            className="btn btn-outline-dark border-0 px-4"
+            // onClick={() => {
+            //   const vid = videoRef.current
+            //   if (vid) vid.currentTime = Math.max(0, vid.currentTime - 5)
+            // }}
+          >
+            <i className="bi bi-skip-backward-fill me-2"></i> 5s
+          </button>
+
+          <button
+            type="button"
+            className="btn border-0 fs-1 text-red-damask"
+            // onClick={() => {
+            //   const vid = videoRef.current
+            //   if (!vid) return
+            //   if (vid.paused) {
+            //     vid.play()
+            //     setIsPaused(false)
+            //   } else {
+            //     vid.pause()
+            //     setIsPaused(true)
+            //   }
+            // }}
+          >
+            <i className={`bi ${isPaused ? 'bi-play-fill' : 'bi-pause-fill'}`}></i>
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-outline-dark border-0 px-4"
+            // onClick={() => {
+            //   const vid = videoRef.current
+            //   if (vid) vid.currentTime = Math.min(vid.duration, vid.currentTime + 5)
+            // }}
+          >
+            5s <i className="bi bi-skip-forward-fill ms-2"></i>
+          </button>
+
+          <button className="btn btn-outline-dark border-0 px-4" onClick={() => (window as any).trainAPI.nextClip()}>Next Clip</button>
+          <button className="btn btn-outline-dark border-0 px-4" onClick={() => (window as any).trainAPI.nextSeries()}>Next Series</button>
+        </div>
+      )}
+
       {started && currentZone !== null && (
         <div className="alert alert-danger mt-4">
           <strong>Expected Zone:</strong> {currentZone}
@@ -426,9 +501,11 @@ export const Training = () => {
 
           {showStats && <Statistics responses={responses} />}
 
-
         </div>
       )}
+
+      {alert && <Alert message={alert.message} type={alert.type} />}
+
     </div>
   )
 }

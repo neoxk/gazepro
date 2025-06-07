@@ -1,7 +1,7 @@
 import { JSX, useState } from "react";
 
 import man from '../assets/images/handball-man.svg';
-import logo from '@renderer/assets/images/logo-placeholder.png';
+import logo from '@renderer/assets/images/logo.png';
 import usFlag from '@renderer/assets/images/us.png';
 import siFlag from '@renderer/assets/images/si.png';
 
@@ -70,7 +70,7 @@ export const Home = ({ onContinue, onOpenFolder }: HomeProps): JSX.Element => {
         <img src={man} className="handball-bg " alt="" />
             <div className="text-dark d-flex flex-column justify-content-center align-items-center" style={{ height: '90vh', paddingTop: '12vh', overflow: 'hidden' }}>
                 <div className="text-center position-relative" style={{ zIndex: 1, maxWidth: '500px', width: '100%' }}>
-                    <img src={logo} alt="Logo" width={70} height={70} className="mb-2" />
+                    <img src={logo} alt="Logo" width={100} className="mb-2" />
                     <h1 className="mb-3 fw-bold">GazePro</h1>
                     <h6 className="fw-normal">
                         Train the <span className="text-red-damask">Mind.</span> Sharpen the <span className="text-red-damask">Reflex.</span>
