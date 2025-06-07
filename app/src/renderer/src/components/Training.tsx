@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { Statistics } from './Statistics'
 
 import handballMan from '@renderer/assets/images/handball-man.svg'
 
@@ -69,154 +68,21 @@ export const Training = () => {
       }
 
       if (e.key === 'Enter' && responseZone !== null) {
-        recordResponse()
+        // recordResponse()
       }
     }
+
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
+
   }, [started, currentZone, responseZone])
 
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const videoContainerRef = useRef<HTMLDivElement>(null)
+  
 
-  const shuffle = <T,>(arr: T[]): T[] => {
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[arr[i], arr[j]] = [arr[j], arr[i]]
-    }
-    return arr
-  }
-
-  const buildSequence = (cutouts: CutoutRow[]) => {
-    const sequence: Array<{ url: string; start: number; end: number } | { delay: number }> =
-      []
-
-
-
-    for (let s = 0; s < seriesFilters.length; s++) {
-      const { zones, positions, hands, defences } = seriesFilters[s]
-
-          console.log('Hands filter:', hands);
-console.log('Cutouts sample:', cutouts.slice(0, 5).map(c => c.hand));
-
-
-      const matching = cutouts.filter((c) =>
-        (zones.length === 0 || zones.includes(c.zone)) &&
-        (positions.length === 0 || positions.includes(c.position)) &&
-        (hands.length === 0 || hands.map(h => h.toLowerCase()).includes(c.hand.toLowerCase())) &&
-        (defences.length === 0 || defences.map(d => d.toLowerCase()).includes(c.defended.toLowerCase()))
-      )
-
-      const picks = shuffle([...matching]).slice(0, clipsPerSeries)
-
-      picks.forEach((c, idx) => {
-        sequence.push({ url: c.video_path, start: c.start, end: c.end })
-        if (idx < picks.length - 1) {
-          sequence.push({ delay: pauseBetweenClips })
-        }
-      })
-
-      if (s < seriesFilters.length - 1) {
-        sequence.push({ delay: pauseBetweenSeries })
-      }
-    }
-
-    return sequence
-  }
-
-  const playSequence = async (
-    seq: Array<{ url: string; start: number; end: number } | { delay: number }>,
-    cutouts: CutoutRow[]
-  ) => {
-    const vid = videoRef.current!
-    for (const item of seq) {
-      if ('delay' in item) {
-        vid.pause()
-        await new Promise((r) => setTimeout(r, item.delay * 1000))
-      } else {
-        
-        const matched = cutouts.find(c => c.video_path === item.url && c.start === item.start && c.end === item.end)
-        if (matched?.zone) {
-          setCurrentZone(matched.zone)
-          videoRef.current?.setAttribute('data-label', matched.label)
-        } else {
-          setCurrentZone(null)
-        }
-
-
-        vid.src = item.url
-        vid.playbackRate = speed
-        await new Promise<void>((resolve) => {
-          const onLoaded = () => {
-            vid.currentTime = item.start
-            vid.play()
-          }
-          const onTimeUpdate = () => {
-            if (vid.currentTime >= item.end) {
-              vid.pause()
-              vid.removeEventListener('timeupdate', onTimeUpdate)
-              vid.removeEventListener('loadedmetadata', onLoaded)
-              resolve()
-            }
-          }
-          vid.addEventListener('loadedmetadata', onLoaded, { once: true })
-          vid.addEventListener('timeupdate', onTimeUpdate)
-        })
-      }
-    }
-    setStarted(false)
-    if (document.fullscreenElement) {
-      document.exitFullscreen().catch(() => {})
-    }
-  }
-
-  const recordResponse = () => {
-    if (currentZone !== null && responseZone !== null) {
-      const label = videoRef.current?.getAttribute('data-label') ?? ''
-
-      const seriesIdx = seriesFilters.findIndex((_, i) => i === currentZone - 1)
-
-      setResponses((prev) => [
-        ...prev,
-        {
-          expected: currentZone,
-          actual: responseZone,
-          label,
-          series: seriesIdx + 1,
-          position: allPositions[seriesIdx],
-        },
-      ])
-      setResponseZone(null)
-    }
-  }
-
-  const handleStart = async () => {
-    if (seriesFilters.length === 0) {
-      alert('Please add at least one series')
-      return
-    }
-
-    const cutouts: CutoutRow[] = await (window.api as any).loadAllCutouts()
-    setCutouts(cutouts)
-    const seq = buildSequence(cutouts);
-
-    const hasClips = seq.some(item => 'url' in item);
-    if (!hasClips) {
-      alert('No matching clips found for the selected filters.');
-      return;
-    }
-
-    setStarted(true)
-    setTimeout(() => {
-      videoContainerRef.current?.requestFullscreen().catch(() => {})
-    }, 100)
-
-    await playSequence(seq, cutouts)
-  }
 
   const handleRestart = () => {
-    setStarted(false)
+    // setStarted(false)
     if (document.fullscreenElement) {
       document.exitFullscreen().catch(() => {})
     }
@@ -401,7 +267,7 @@ console.log('Cutouts sample:', cutouts.slice(0, 5).map(c => c.hand));
             <button
               type="button"
               className="btn btn-red-damask w-100"
-              onClick={handleStart}
+              onClick={() => {}}
               disabled={started}
             >
               Start Training
@@ -418,52 +284,6 @@ console.log('Cutouts sample:', cutouts.slice(0, 5).map(c => c.hand));
           </div>
         </div>
 
-        <div ref={videoContainerRef} className={started ? 'video-fullscreen-wrapper' : ''} style={{ position: 'relative' }}>
-          <video
-            ref={videoRef}
-            controls
-            style={{
-              width: '100%',
-              height: started ? '100vh' : 'auto',
-              objectFit: 'contain'
-            }}
-          />
-
-          {currentZone !== null && started && (
-            <div
-              className="position-absolute top-0 end-0 bg-white border rounded p-3 shadow"
-              style={{
-                zIndex: 10,
-                width: '250px',
-                margin: '1rem',
-                pointerEvents: 'auto',
-                opacity: 0.95
-              }}
-            >
-              <h6>Expected Zone: {currentZone}</h6>
-              <label className="form-label">Actual Defended Zone</label>
-              <input
-                type="text"
-                className="form-control mb-2"
-                min={1}
-                max={9}
-                value={responseZone ?? ''}
-                onChange={(e) => setResponseZone(Number(e.target.value))}
-              />
-              <button
-                className="btn btn-sm btn-outline-red-damask w-100"
-                onClick={recordResponse}
-                disabled={responseZone === null}
-              >
-                Submit Response
-              </button>
-            </div>
-          )}
-
-          {!started && responses.length > 0 && (
-            <Statistics responses={responses} />
-          )}
-        </div>
       </form>
     </div>
   )

@@ -1,5 +1,17 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import trainChannel from './trainChannel'
+
+const trainAPI = {
+  loadScreen: () => ipcRenderer.send(trainChannel.LOAD_SCREEN),
+  play: (vid_path: string, from: number, to: number, speed: number) => ipcRenderer.send(trainChannel.PLAY, vid_path, from, to, speed),
+  pause: () => ipcRenderer.send(trainChannel.PAUSE),
+  exit: () => ipcRenderer.send(trainChannel.EXIT),
+  delay: (seconds: number) => ipcRenderer.send(trainChannel.DELAY),
+
+  onScreenLoaded: (cb) => ipcRenderer.on(trainChannel.SCREEN_LOADED, (_evt) => cb()),
+  onClipFinished: (cb) => ipcRenderer.on(trainChannel.CLIP_FINISHED, (_evt) => cb())
+}
 
 const api = {
   openFolder: (): Promise<string[]> => ipcRenderer.invoke('dialog:openFolder'),
@@ -28,6 +40,7 @@ const api = {
 if (process.contextIsolated) {
   contextBridge.exposeInMainWorld('electron', electronAPI)
   contextBridge.exposeInMainWorld('api', api)
+  contextBridge.exposeInMainWorld('trainAPI', trainAPI)
 } else {
   // @ts-ignore
   window.electron = electronAPI

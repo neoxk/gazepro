@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, screen } from 'electron'
 import { join } from 'path'
 import { dialog } from 'electron'
 import fs from 'fs'
@@ -13,10 +13,15 @@ import Const from '../renderer/src/core/const'
 
 import CutoutsController, { CutoutRow } from '../renderer/src/core/modules/CutoutsController'
 
+import trainChannel from '../preload/trainChannel'
+import { StringDecoder } from 'string_decoder'
+
 ffmpeg.setFfprobePath(ffprobeStatic.path)
 
+
+let mainWindow: BrowserWindow;
 function createWindow(): void {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1280,
     height: 1000,
     minWidth: 1280,
@@ -50,6 +55,76 @@ function createWindow(): void {
 app.whenReady().then(() => {
   const initializer = new Initializer()
   initializer.initNew(Const.SETTINGS_PATH)
+
+  let trainWin: BrowserWindow
+
+  /* TRAIN SCREEN COMMUNICATION -- MAIN -> TRAIN
+      -------------------------
+  */
+
+      ipcMain.on(trainChannel.LOAD_SCREEN, (_evt) => {
+        const primaryDisplay = screen.getPrimaryDisplay()
+        let extDisplay = screen.getAllDisplays().find(display => display.id != primaryDisplay.id)
+
+        let fullscreen = true 
+        if (!extDisplay) {
+          extDisplay = primaryDisplay
+          fullscreen = false 
+        }
+        
+        trainWin = new BrowserWindow({
+          x: extDisplay.bounds.x, y: extDisplay.bounds.y,
+          width: 600, height: 450,
+          frame: false,
+          fullscreen: fullscreen,
+          show: false,
+          webPreferences: {
+            preload: join(__dirname, '../preload/train.js'),
+            sandbox: false,
+          }
+      })
+
+      if (is.dev && process.env['ELECTRON_RENDERER_URL']) trainWin.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/trainprojection')
+      else trainWin.loadFile(path.join(__dirname, '../renderer/index.html'), {hash: '/trainprojection'})
+
+      trainWin.on('ready-to-show', () => trainWin.show())
+      
+      })
+
+      ipcMain.on(trainChannel.PLAY, (_evt, vid_path: string, from: number, to: number, speed: number) => {
+        trainWin.webContents.send(trainChannel.PLAY, vid_path, from, to, speed)
+      })
+
+      ipcMain.on(trainChannel.PAUSE, (_evt) => {
+          trainWin.webContents.send(trainChannel.PAUSE)
+      })
+
+      ipcMain.on(trainChannel.RESUME, () => {
+        trainWin.webContents.send(trainChannel.RESUME)
+      })
+
+      ipcMain.on(trainChannel.EXIT, (_evt) => {
+        trainWin.destroy()
+      })
+
+      ipcMain.on(trainChannel.DELAY, (_evt, seconds: number) => {
+        trainWin.webContents.send(trainChannel.DELAY, seconds)
+      })
+
+ 
+
+  /* TRAIN SCREEN COMMUNICATION -- MAIN -> TRAIN
+      -------------------------
+  */
+
+  // TRAIN -> MAIN (notificationst)
+
+      ipcMain.on(trainChannel.CLIP_FINISHED, () => mainWindow.webContents.send(trainChannel.CLIP_FINISHED))
+      ipcMain.on(trainChannel.SCREEN_LOADED, () => mainWindow.webContents.send(trainChannel.SCREEN_LOADED))
+
+  // ------------------
+
+
 
   ipcMain.handle('dialog:openFolder', async () => {
     const result = await dialog.showOpenDialog({
