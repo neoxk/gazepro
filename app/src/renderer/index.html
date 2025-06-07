@@ -10,7 +10,19 @@
     />
   </head>
 
-  <body class="bg-white">
+  <style>
+    video::-webkit-media-controls {
+      display: none !important;
+    }
+    video::-webkit-media-controls-overlay-enclosure {
+      display: none !important;
+    }
+    video::-webkit-media-controls-start-playback-button {
+      display: none !important;
+    }
+  </style>
+
+  <body class="bg-white m-0 p-0">
     <div id="root"></div>
     <div id="modal-root"></div>
     <script type="module" src="/src/main.tsx"></script>
