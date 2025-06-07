@@ -65,7 +65,7 @@ class CutoutsController {
     id: number,
     fields: Partial<Omit<CutoutRow, 'id'>>
   ): Promise<void> {
-    if (typeof id !== 'number') {
+    if (typeof id !== 'number' || Number.isNaN(id)) {
       throw new Error('CutoutsController.update: `id` must be a number')
     }
     await this.ts.update('cutouts', { id, ...fields } as Record<string, unknown>)
