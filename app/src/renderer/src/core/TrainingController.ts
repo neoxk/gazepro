@@ -52,7 +52,9 @@ class TrainingController {
     filters: Filter[], 
     series: number[],
     delays: {betweenClips: number, betweenSeries: number},
-    speed: number) {
+    speed: number,
+    private onCutoutStart?: (cutout: CutoutRow, seriesIndex: number) => void,
+    private onTrainingEnd?: () => void) {
 
     this.trainAPI = trainAPI
     this.cutouts = cutouts
@@ -75,6 +77,8 @@ class TrainingController {
     this.playClip = this.playClip.bind(this)
     this.trainAPI.onScreenLoaded(this.playClip)
     this.trainAPI.loadScreen()
+
+    this.responses = this.series.map(count => Array(count).fill(0))
   }
 
   public pause() {
@@ -93,7 +97,7 @@ class TrainingController {
   }
 
   public recordResponse(zone: number) {
-    if (!this.currentSeriesIndex || !this.currentCutoutIndex) return console.log('No videos have played yet, response not saved')
+    if (this.currentSeriesIndex === null || this.currentCutoutIndex === null) return console.log('No videos have played yet, response not saved')
 
     this.responses[this.currentSeriesIndex][this.currentCutoutIndex] = zone
   }
@@ -173,21 +177,27 @@ class TrainingController {
   private playClip = () => {
     if (this.isPaused) return;
   
-    if(!this.advanceClip()) return this.trainAPI.exit()
+    if (!this.advanceClip()) {
+      this.trainAPI.exit();
+      this.onTrainingEnd?.();
+      return;
+    }
   
     const cur =
       this.trainingSequence[this.currentSeriesIndex!][this.currentCutoutIndex!];
 
     if (!cur) {
-      return this.trainAPI.exit();
+      this.trainAPI.exit();
+      this.onTrainingEnd?.();
+      return;
     }
-
-  
     
     if ("delay" in cur) {
       return this.trainAPI.delay(cur.delay);
     }
- 
+    
+    this.onCutoutStart?.(cur, this.currentSeriesIndex!);
+
     this.trainAPI.play(cur.video_path, cur.start, cur.end, this.speed);
   };
 

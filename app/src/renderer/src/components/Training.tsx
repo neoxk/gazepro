@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import handballMan from '@renderer/assets/images/handball-man.svg'
 import TrainingController from '../core/TrainingController'
 import { ipcMain } from 'electron'
+import { Statistics } from './Statistics'
 
 interface cutoutrow {
   video_path: string
@@ -35,6 +36,8 @@ export const Training = () => {
   const [responses, setResponses] = useState<
     Array<{ expected: number; actual: number; label: string; series: number; position: string }>
   >([])
+
+  const [showStats, setShowStats] = useState(false)
 
   const allPositions = ['Left Wing', 'Right Wing', 'Center', 'Pivot', 'Back Left', 'Back Right']
   const allHands = ['Left', 'Right']
@@ -93,17 +96,42 @@ export const Training = () => {
       seriesFilters,
       seriesArray,
       { betweenClips: pauseBetweenClips, betweenSeries: pauseBetweenSeries },
-      speed
+      speed,
+      (cutout, currentSeries) => {
+        setCurrentZone(cutout.zone)
+        setResponses((prev) => [
+          ...prev,
+          {
+            expected: cutout.zone,
+            actual: 0,
+            label: cutout.label,
+            series: currentSeries,
+            position: cutout.position,
+          },
+        ])
+      },
+      () => {
+        setStarted(false)
+        setCurrentZone(null)
+        setResponseZone(null)
+      }
     )
 
+    setStarted(true)
     trainingController.startTraining()
   }
+
 
   const handleRestart = () => {
     if (document.fullscreenElement) {
       document.exitFullscreen().catch(() => {})
     }
+    setStarted(false)
+    setCurrentZone(null)
+    setResponseZone(null)
+    setResponses([])
   }
+
 
   return (
     <div className="container mt-5 text-dark position-relative" style={{ zIndex: 1 }}>
@@ -311,6 +339,96 @@ export const Training = () => {
           </div>
         </div>
       </form>
+
+      {started && currentZone !== null && (
+        <div className="alert alert-danger mt-4">
+          <strong>Expected Zone:</strong> {currentZone}
+          <div className="mt-2">
+            <label htmlFor="zoneInput" className="form-label">Enter Actual Zone (1–9):</label>
+            <input
+              type="number"
+              id="zoneInput"
+              className="form-control"
+              min={1}
+              max={9}
+              value={responseZone ?? ''}
+              onChange={(e) => {
+                const val = Number(e.target.value)
+                if (val >= 1 && val <= 9) setResponseZone(val)
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && responseZone !== null) {
+                  setResponses((prev) => {
+                    const copy = [...prev]
+                    copy[copy.length - 1].actual = responseZone
+                    return copy
+                  })
+                  setResponseZone(null)
+                  setCurrentZone(null)
+                }
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {!started && responses.length > 0 && (
+        <div className="card mt-4 p-3">
+          <h4>Review Responses</h4>
+          <div className="table-responsive">
+            <table className="table table-bordered mt-3">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Expected Zone</th>
+                  <th>Actual Zone</th>
+                  <th>Label</th>
+                  <th>Position</th>
+                  <th>Series</th>
+                </tr>
+              </thead>
+              <tbody>
+                {responses.map((resp, i) => (
+                  <tr key={i}>
+                    <td>{i + 1}</td>
+                    <td>{resp.expected}</td>
+                    <td>
+                      <input
+                        type="number"
+                        min={1}
+                        max={9}
+                        value={resp.actual}
+                        onChange={(e) => {
+                          const newVal = Number(e.target.value)
+                          setResponses((prev) => {
+                            const copy = [...prev]
+                            copy[i].actual = newVal
+                            return copy
+                          })
+                        }}
+                      />
+                    </td>
+                    <td>{resp.label}</td>
+                    <td>{resp.position}</td>
+                    <td>{resp.series + 1}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <button
+            className="btn btn-outline-red-damask mt-3"
+            onClick={() => setShowStats(prev => !prev)}
+          >
+            {showStats ? 'Hide Statistics' : 'Show Statistics'}
+          </button>
+
+          {showStats && <Statistics responses={responses} />}
+
+
+        </div>
+      )}
     </div>
   )
 }
