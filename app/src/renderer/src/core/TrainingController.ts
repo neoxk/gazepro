@@ -1,10 +1,9 @@
-import { CutoutRow } from "./modules/CutoutsController"
 
 interface Filter {
-  hand: number[],
-  position: number[],
-  zone: number[],
-  defense: number[]
+  zones: number[]
+  positions: string[]
+  hands: string[]
+  defences: string[]
 }
 
 interface ItrainAPI { 
@@ -17,13 +16,23 @@ interface ItrainAPI {
   onScreenLoaded: (cb) => void
 }
 
+interface CutoutRow {
+  video_path: string
+  start: number
+  end: number
+  label: string
+  zone: number
+  position: string
+  hand: string
+  defended: string
+}
 
 class TrainingController {
   private cutouts: CutoutRow[] = []
   private trainAPI: ItrainAPI
   private filters: Filter[]
   private series: number[]
-  private delays: {betweenClips: number, betweenSeries: number}[]
+  private delays: {betweenClips: number, betweenSeries: number}
   private speed: number
 
   private trainingSequence: Array<Array<CutoutRow | {delay: number}>> = [[]]
@@ -34,18 +43,20 @@ class TrainingController {
 
   private isPaused: boolean = false;
 
+  private responses: Array<number[]> = [[]]
+
   constructor(
     trainAPI: ItrainAPI, 
     cutouts: CutoutRow[], 
     filters: Filter[], 
-    series: number[], 
-    delays: {betweenClips: number, betweenSeries: number}[],
+    series: number[],
+    delays: {betweenClips: number, betweenSeries: number},
     speed: number) {
 
     this.trainAPI = trainAPI
     this.cutouts = cutouts
     this.filters = filters
-    this.series = series
+    this.series = series 
     this.delays = delays
     this.speed = speed
 
@@ -76,7 +87,13 @@ class TrainingController {
   }
 
   public recordResponse(zone: number) {
+    if (!this.currentSeriesIndex || !this.currentCutoutIndex) return console.log('No videos have played yet, response not saved')
 
+    this.responses[this.currentSeriesIndex][this.currentCutoutIndex] = zone
+  }
+
+  public getResponses(): Array<number[]> {
+    return this.responses
   }
 
   private filterCutouts() {
@@ -84,10 +101,10 @@ class TrainingController {
 
       for (const [cutoutIndex, cutout] of this.cutouts.entries()) {
         if (
-          cutout.defended in filter.defense &&
-          cutout.position in filter.position &&
-          cutout.shotHand in filter.hand &&
-          cutout.zone in filter.zone
+          cutout.defended in filter.defences &&
+          cutout.position in filter.positions &&
+          cutout.hand in filter.hands &&
+          cutout.zone in filter.zones
         ) {
           this.filteredCutouts[seriesIndex].push(cutout)
           this.cutouts.splice(cutoutIndex, 1)
@@ -105,12 +122,12 @@ class TrainingController {
 
       for (const cutout of cutouts) {
         this.trainingSequence[seriesIndex].push(cutout)
-        this.trainingSequence[seriesIndex].push({delay: this.delays[seriesIndex].betweenClips})
+        this.trainingSequence[seriesIndex].push({delay: this.delays.betweenClips})
       }
 
-      let calculatedBetweenSeriesDelay = this.delays[seriesIndex].betweenSeries - this.delays[seriesIndex].betweenClips 
+      let calculatedBetweenSeriesDelay = this.delays[seriesIndex].betweenSeries - this.delays.betweenClips 
       this.trainingSequence[seriesIndex].push({
-        delay:  calculatedBetweenSeriesDelay > 0 ? calculatedBetweenSeriesDelay : this.delays[seriesIndex].betweenClips
+        delay:  calculatedBetweenSeriesDelay > 0 ? calculatedBetweenSeriesDelay : this.delays.betweenClips
       })
     }
   }
@@ -139,7 +156,8 @@ class TrainingController {
   }
 
   private playClip() {
-    if (this.isPaused) return 
+    if (this.isPaused) return 0; 
+
     this.advanceClip()    
 
     let currentCutout = this.filterCutouts[this.currentSeriesIndex!][this.currentCutoutIndex!]

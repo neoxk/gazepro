@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 
 import handballMan from '@renderer/assets/images/handball-man.svg'
+import TrainingController from '../core/TrainingController'
+import { ipcMain } from 'electron'
 
-interface CutoutRow {
+interface cutoutrow {
   video_path: string
   start: number
   end: number
@@ -27,7 +29,7 @@ export const Training = () => {
   const [pauseBetweenClips, setPauseBetweenClips] = useState(2)
   const [pauseBetweenSeries, setPauseBetweenSeries] = useState(5)
   const [started, setStarted] = useState(false)
-  const [cutouts, setCutouts] = useState<CutoutRow[]>([])
+  const [cutouts, setCutouts] = useState<cutoutrow[]>([])
   const [currentZone, setCurrentZone] = useState<number | null>(null)
   const [responseZone, setResponseZone] = useState<number | null>(null)
   const [responses, setResponses] = useState<Array<{ expected: number; actual: number; label: string; series: number; position: string }>>([])
@@ -68,7 +70,6 @@ export const Training = () => {
       }
 
       if (e.key === 'Enter' && responseZone !== null) {
-        // recordResponse()
       }
     }
 
@@ -77,6 +78,23 @@ export const Training = () => {
     return () => window.removeEventListener('keydown', handleKeyDown)
 
   }, [started, currentZone, responseZone])
+
+
+  function handleStart() {
+    let seriesArray: number[] = []
+    for (let i = 0; i < seriesFilters.length; i++) seriesArray.push(clipsPerSeries)
+
+    const trainingController = new TrainingController(
+      (window as any).trainAPI,
+      cutouts,
+      seriesFilters,
+      seriesArray,
+      {betweenClips: pauseBetweenClips, betweenSeries: pauseBetweenSeries},
+      speed
+    )
+
+    trainingController.startTraining()
+  }
 
   
 
@@ -267,7 +285,7 @@ export const Training = () => {
             <button
               type="button"
               className="btn btn-red-damask w-100"
-              onClick={() => {}}
+              onClick={handleStart}
               disabled={started}
             >
               Start Training

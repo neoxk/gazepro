@@ -148,6 +148,7 @@ app.whenReady().then(() => {
   })
 
   ipcMain.handle('cutouts:load', async (_evt, videoPath: string) => {
+    console.log('load cutouts')
     return await CutoutsController.loadFor(videoPath)
   })
 
@@ -201,6 +202,8 @@ app.whenReady().then(() => {
         thumbnailDataUrl
       } = payload
 
+      console.log('in main process saveWithThumbnail call')
+
       const basefolder = path.join(app.getPath('appData'), 'gazepro', 'thumbnails')
       if (!fs.existsSync(basefolder)) fs.mkdirSync(basefolder, { recursive: true })
 
@@ -210,6 +213,8 @@ app.whenReady().then(() => {
       const data = thumbnailDataUrl.replace(/^data:image\/\w+;base64,/, '')
       const buffer = Buffer.from(data, 'base64')
       fs.writeFileSync(outPath, buffer)
+
+      console.log('written')
 
       await CutoutsController.save({
         video_path,

@@ -1,38 +1,93 @@
-import { useEffect, useRef } from "react"
-import trainChannel from "../../../preload/trainChannel"
+import { useEffect, useRef, useState, useCallback } from "react";
 
 const TrainProjection = () => {
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [black, setBlack] = useState(true);
+
+  const clearTimer = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
+
+  const handlePlay = useCallback(
+    (vidPath: string, from: number, to: number, speed: number) => {
+      if (!videoRef.current) return;
+      clearTimer();
+      setBlack(false);
+
+      const v = videoRef.current;
+      v.src = vidPath;
+      v.playbackRate = speed;
+      v.currentTime = from;
+      void v.play();
+
+      const realDurationMs = ((to - from) / speed) * 1000;
+
+      timeoutRef.current = setTimeout(() => {
+        (window as any).playerAPI.notifyFinished();
+        setBlack(true);
+      }, realDurationMs);
+    },
+    []
+  );
+
+  const handlePause = useCallback(() => {
+  }, []);
+
+  const handleResume = useCallback(() => {
+  }, []);
+
+  const handleDelay = useCallback((seconds: number) => {
+    clearTimer();
+    setBlack(true);
+    timeoutRef.current = setTimeout(() => setBlack(false), seconds * 1000);
+  }, []);
 
   useEffect(() => {
-    (window as any).playerAPI.onPlay(handlePlay);
-    (window as any).playerAPI.onPause(() => {});
-    (window as any).playerAPI.onResume(() => {});
-    (window as any).playerAPI.onDelay((seconds: number) => {})
-  }, [])
+    const { playerAPI } = window as any;
 
-  const handlePlay = (vid_path: string, from: number, to: number, speed: number) => {
-    videoRef.current!.src = vid_path
-    videoRef.current!.playbackRate = speed
-    videoRef.current!.currentTime = from
-    videoRef.current!.play()
-  }
+    playerAPI.onPlay(handlePlay);
+    playerAPI.onPause(handlePause);
+    playerAPI.onResume(handleResume);
+    playerAPI.onDelay(handleDelay);
+    playerAPI.notifyLoaded();
 
-  const handlePause = () => {
-    videoRef.current!.pause()
-  }
+    return () => {
+      playerAPI.offPlay?.(handlePlay);
+      playerAPI.offPause?.(handlePause);
+      playerAPI.offResume?.(handleResume);
+      playerAPI.offDelay?.(handleDelay);
+      clearTimer();
+    };
+  }, [handlePlay, handlePause, handleResume, handleDelay]);
 
+  return (
+    <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
+      <video
+        ref={videoRef}
+        controls={false}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+          visibility: black ? "hidden" : "visible"
+        }}
+      />
+      {black && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "black"
+          }}
+        />
+      )}
+    </div>
+  );
+};
 
-  const handleResume = () => {
-    videoRef.current!.play()
-  }
+export default TrainProjection;
 
-  return <div style={{width: "100vw", height:"100vh"}}>
-    <video ref={videoRef} controls={false} style={{width: '100%', height: "100%", objectFit: 'contain'}}>
-
-    </video>
-  </div>
-        
-  }
-
-export default TrainProjection
