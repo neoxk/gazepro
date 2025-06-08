@@ -72,6 +72,18 @@ export const Training = () => {
     })
   }
 
+  const selectAllFilter = <T,>(
+    index: number,
+    field: keyof SeriesFilter,
+    allOptions: T[]
+  ) => {
+    setSeriesFilters((prev) => {
+      const copy = [...prev]
+      copy[index] = { ...copy[index], [field]: [...allOptions] }
+      return copy
+    })
+  }
+
   useEffect(() => {
     ;(window as any).api.loadAllCutouts().then((cutouts) => setCutouts(cutouts))
   }, [])
@@ -108,6 +120,18 @@ export const Training = () => {
         type: 'danger',
       })
 
+      return
+    }
+
+    const unfiltered = seriesFilters.some(
+      (s) => s.positions.length === 0 && s.zones.length === 0 && s.hands.length === 0 && s.defences.length === 0
+    )
+
+    if (unfiltered) {
+      setAlert({ 
+        id: Date.now(), 
+        message: 'Each series must have at least one filter set.', 
+        type: 'danger' })
       return
     }
 
@@ -165,7 +189,7 @@ export const Training = () => {
       <form onSubmit={(e) => e.preventDefault()}>
         <div className="row mb-4">
           <div className="col-md-2">
-            <label>Clips/Series</label>
+            <label>Clips per Series</label>
             <input
               type="number"
               className="form-control"
@@ -187,7 +211,7 @@ export const Training = () => {
             />
           </div>
           <div className="col-md-3">
-            <label>Pause Between Clips (s)</label>
+            <label>Pause between Clips (s)</label>
             <input
               type="number"
               className="form-control"
@@ -197,7 +221,7 @@ export const Training = () => {
             />
           </div>
           <div className="col-md-3">
-            <label>Pause Between Series (s)</label>
+            <label>Pause between Series (s)</label>
             <input
               type="number"
               className="form-control"
@@ -258,6 +282,15 @@ export const Training = () => {
                         </label>
                       </li>
                     ))}
+                    <li className="mb-2">
+                      <button
+                        type="button"
+                        className="btn btn-outline-dark w-100"
+                        onClick={() => selectAllFilter(idx, 'positions', allPositions)}
+                      >
+                        Select All
+                      </button>
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -296,6 +329,15 @@ export const Training = () => {
                         </label>
                       </li>
                     ))}
+                    <li className="mb-2">
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-dark w-100"
+                        onClick={() => selectAllFilter(idx, 'zones', [1, 2, 3, 4, 5, 6, 7, 8, 9])}
+                      >
+                        Select All
+                      </button>
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -452,7 +494,7 @@ export const Training = () => {
           <h4>Review Responses</h4>
           <div className="table-responsive">
             <table className="table table-bordered mt-3">
-              <thead>
+              <thead className="bg-light">
                 <tr>
                   <th>#</th>
                   <th>Expected Zone</th>
@@ -504,7 +546,7 @@ export const Training = () => {
         </div>
       )}
 
-      {alert && <Alert message={alert.message} type={alert.type} />}
+      {alert && <Alert key={alert.id} message={alert.message} type={alert.type} />}
 
     </div>
   )
