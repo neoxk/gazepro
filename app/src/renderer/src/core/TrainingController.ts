@@ -1,4 +1,4 @@
-import { ciIncludes } from './util'
+import { ciIncludes, shuffle } from './util'
 
 interface Filter {
   zones: number[]
@@ -57,11 +57,11 @@ class TrainingController {
     series: number[],
     delays: { betweenClips: number; betweenSeries: number },
     speed: number,
-    private onCutoutStart?: (cutout: CutoutRow, seriesIndex: number) => void,
-    private onTrainingEnd?: () => void
+    private onCutoutStart: (cutout: CutoutRow, seriesIndex: number) => void,
+    private onTrainingEnd: () => void
   ) {
     this.trainAPI = trainAPI
-    this.cutouts = cutouts
+    this.cutouts = cutouts 
     this.filters = filters
     this.series = series
     this.delays = delays
@@ -74,7 +74,6 @@ class TrainingController {
   }
 
   public startTraining() {
-    console.log('startTraining')
     this.filterCutouts()
     this.buildSequence()
 
@@ -98,6 +97,7 @@ class TrainingController {
     this.currentSeriesIndex = null
     this.playClip()
   }
+
 
   public pause() {
     this.isPaused = true
@@ -133,11 +133,11 @@ class TrainingController {
   }
 
   private filterCutouts() {
+    const cutoutsCopy = shuffle([...this.cutouts])
     for (const [seriesIndex, filter] of this.filters.entries()) {
       this.filteredCutouts[seriesIndex] = this.filteredCutouts[seriesIndex] ?? []
-      console.log(this.filters)
 
-      for (const cutout of [...this.cutouts]) {
+      for (const cutout of cutoutsCopy) {
         if (this.filteredCutouts[seriesIndex].length >= this.series[seriesIndex]) break
 
         if (
@@ -147,7 +147,7 @@ class TrainingController {
           filter.zones.includes(cutout.zone)
         ) {
           this.filteredCutouts[seriesIndex].push(cutout)
-          this.cutouts.splice(this.cutouts.indexOf(cutout), 1)
+          cutoutsCopy.splice(cutoutsCopy.indexOf(cutout), 1)
         }
         if (this.filteredCutouts[seriesIndex].length >= this.series[seriesIndex]) break
       }

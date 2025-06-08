@@ -58,21 +58,21 @@ app.whenReady().then(() => {
   initializer.initNew(Const.SETTINGS_PATH)
 
   let trainWin: BrowserWindow | null
-
-  const primaryDisplay = screen.getPrimaryDisplay()
-  let extDisplay = screen.getAllDisplays().find((display) => display.id != primaryDisplay.id)
-
   let fullscreen = true
-  if (!extDisplay) {
-    extDisplay = primaryDisplay
-    fullscreen = false
-  }
 
   /* TRAIN SCREEN COMMUNICATION -- MAIN -> TRAIN
       -------------------------
   */
 
   ipcMain.on(trainChannel.LOAD_SCREEN, (_evt) => {
+    const primaryDisplay = screen.getPrimaryDisplay()
+    let extDisplay = screen.getAllDisplays().find((display) => display.id != primaryDisplay.id)
+
+    if (!extDisplay) {
+      extDisplay = primaryDisplay
+      fullscreen = false
+    }
+
     console.log('load screen ' + _evt.processId)
     trainWin = new BrowserWindow({
       x: extDisplay.bounds.x,
@@ -99,6 +99,7 @@ app.whenReady().then(() => {
 
   ipcMain.handle(trainChannel.IS_FULLSCREEN, (_evt) => {
     _evt.processId
+    console.log('Asked if fullscreen, returning: ' + fullscreen)
     return fullscreen
   })
 

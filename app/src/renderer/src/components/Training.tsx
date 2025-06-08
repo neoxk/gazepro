@@ -145,7 +145,8 @@ export const Training = () => {
     let seriesArray: number[] = []
     for (let i = 0; i < seriesFilters.length; i++) seriesArray.push(clipsPerSeries)
 
-    trainingControllerRef.current = new TrainingController(
+    if(!trainingControllerRef.current) 
+      trainingControllerRef.current = new TrainingController(
       (window as any).trainAPI,
       cutouts,
       seriesFilters,
@@ -177,10 +178,10 @@ export const Training = () => {
   }
 
   const handleRestart = () => {
-    trainingControllerRef.current?.restartTraining()
     setCurrentZone(null)
     setResponseZone(null)
     setResponses([])
+    trainingControllerRef.current?.restartTraining()
   }
 
   return (

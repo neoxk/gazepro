@@ -83,7 +83,10 @@ const TrainProjection = () => {
     playerAPI.onResume(handleResume)
     playerAPI.onDelay(handleDelay)
 
-    if (playerAPI.isFullscreen()) videoRef.current?.requestFullscreen().catch(() => {})
+    playerAPI.isFullscreen()
+    .then(isFs => {
+      if (isFs) videoRef.current?.requestFullscreen().catch(() => {}) 
+    }) 
 
     playerAPI.notifyLoaded()
 
