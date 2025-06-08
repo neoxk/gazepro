@@ -37,17 +37,19 @@ export const Training = () => {
     Array<{ expected: number; actual: number; label: string; series: number; position: string }>
   >([])
   const [alert, setAlert] = useState<{
-      id: number
-      message: string
-      type?: 'danger' | 'info' | 'success' | 'warning'
-    } | null>(null)
+    id: number
+    message: string
+    type?: 'danger' | 'info' | 'success' | 'warning'
+  } | null>(null)
 
   const [showStats, setShowStats] = useState(false)
-  const [isPaused, setIsPaused] = useState(true)
+  const [isPaused, setIsPaused] = useState(false)
 
   const allPositions = ['Left Wing', 'Right Wing', 'Center', 'Pivot', 'Back Left', 'Back Right']
   const allHands = ['Left', 'Right']
   const allDefences = ['Yes', 'No']
+
+  const trainingControllerRef = useRef<TrainingController>(null)
 
   const addSeries = () => {
     setSeriesFilters([...seriesFilters, { zones: [], positions: [], hands: [], defences: [] }])
@@ -72,11 +74,7 @@ export const Training = () => {
     })
   }
 
-  const selectAllFilter = <T,>(
-    index: number,
-    field: keyof SeriesFilter,
-    allOptions: T[]
-  ) => {
+  const selectAllFilter = <T,>(index: number, field: keyof SeriesFilter, allOptions: T[]) => {
     setSeriesFilters((prev) => {
       const copy = [...prev]
       copy[index] = { ...copy[index], [field]: [...allOptions] }
@@ -112,33 +110,42 @@ export const Training = () => {
   }, [started, currentZone, responseZone])
 
   function handleStart() {
+    trainingControllerRef.current = null
+    setCurrentZone(null)
+    setResponseZone(null)
+    setResponses([])
 
     if (seriesFilters.length === 0) {
       setAlert({
         id: Date.now(),
         message: 'Please add at least one series!',
-        type: 'danger',
+        type: 'danger'
       })
 
       return
     }
 
     const unfiltered = seriesFilters.some(
-      (s) => s.positions.length === 0 && s.zones.length === 0 && s.hands.length === 0 && s.defences.length === 0
+      (s) =>
+        s.positions.length === 0 &&
+        s.zones.length === 0 &&
+        s.hands.length === 0 &&
+        s.defences.length === 0
     )
 
     if (unfiltered) {
-      setAlert({ 
-        id: Date.now(), 
-        message: 'Each series must have at least one filter set.', 
-        type: 'danger' })
+      setAlert({
+        id: Date.now(),
+        message: 'Each series must have at least one filter set.',
+        type: 'danger'
+      })
       return
     }
 
     let seriesArray: number[] = []
     for (let i = 0; i < seriesFilters.length; i++) seriesArray.push(clipsPerSeries)
 
-    const trainingController = new TrainingController(
+    trainingControllerRef.current = new TrainingController(
       (window as any).trainAPI,
       cutouts,
       seriesFilters,
@@ -154,8 +161,8 @@ export const Training = () => {
             actual: 0,
             label: cutout.label,
             series: currentSeries,
-            position: cutout.position,
-          },
+            position: cutout.position
+          }
         ])
       },
       () => {
@@ -166,20 +173,15 @@ export const Training = () => {
     )
 
     setStarted(true)
-    trainingController.startTraining()
+    trainingControllerRef.current.startTraining()
   }
 
-
   const handleRestart = () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen().catch(() => {})
-    }
-    setStarted(false)
+    trainingControllerRef.current?.restartTraining()
     setCurrentZone(null)
     setResponseZone(null)
     setResponses([])
   }
-
 
   return (
     <div className="container mt-5 text-dark position-relative" style={{ zIndex: 1 }}>
@@ -406,54 +408,49 @@ export const Training = () => {
         </div>
       </form>
 
-
       {started && (
         <div className="d-flex justify-content-center align-items-center my-5">
-          <button className="btn btn-outline-dark border-0 px-4" onClick={() => (window as any).trainAPI.previousSeries()}>Previous Series</button>
-          <button className="btn btn-outline-dark border-0 px-4" onClick={() => (window as any).trainAPI.previousClip()}>Previous Clip</button>
-
           <button
-            type="button"
             className="btn btn-outline-dark border-0 px-4"
-            // onClick={() => {
-            //   const vid = videoRef.current
-            //   if (vid) vid.currentTime = Math.max(0, vid.currentTime - 5)
-            // }}
+            onClick={() => trainingControllerRef.current?.prevSeries()}
           >
-            <i className="bi bi-skip-backward-fill me-2"></i> 5s
+            Previous Series
+          </button>
+          <button
+            className="btn btn-outline-dark border-0 px-4"
+            onClick={() => trainingControllerRef.current?.prevClip()}
+          >
+            Previous Clip
           </button>
 
           <button
             type="button"
             className="btn border-0 fs-1 text-red-damask"
-            // onClick={() => {
-            //   const vid = videoRef.current
-            //   if (!vid) return
-            //   if (vid.paused) {
-            //     vid.play()
-            //     setIsPaused(false)
-            //   } else {
-            //     vid.pause()
-            //     setIsPaused(true)
-            //   }
-            // }}
+            onClick={() => {
+              if (!isPaused) {
+                trainingControllerRef.current?.pause()
+                setIsPaused(true)
+              } else {
+                trainingControllerRef.current?.resume()
+                setIsPaused(false)
+              }
+            }}
           >
             <i className={`bi ${isPaused ? 'bi-play-fill' : 'bi-pause-fill'}`}></i>
           </button>
 
           <button
-            type="button"
             className="btn btn-outline-dark border-0 px-4"
-            // onClick={() => {
-            //   const vid = videoRef.current
-            //   if (vid) vid.currentTime = Math.min(vid.duration, vid.currentTime + 5)
-            // }}
+            onClick={() => trainingControllerRef.current?.nextClip()}
           >
-            5s <i className="bi bi-skip-forward-fill ms-2"></i>
+            Next Clip
           </button>
-
-          <button className="btn btn-outline-dark border-0 px-4" onClick={() => (window as any).trainAPI.nextClip()}>Next Clip</button>
-          <button className="btn btn-outline-dark border-0 px-4" onClick={() => (window as any).trainAPI.nextSeries()}>Next Series</button>
+          <button
+            className="btn btn-outline-dark border-0 px-4"
+            onClick={() => trainingControllerRef.current?.nextSeries()}
+          >
+            Next Series
+          </button>
         </div>
       )}
 
@@ -461,7 +458,9 @@ export const Training = () => {
         <div className="alert alert-danger mt-4">
           <strong>Expected Zone:</strong> {currentZone}
           <div className="mt-2">
-            <label htmlFor="zoneInput" className="form-label">Enter Actual Zone (1–9):</label>
+            <label htmlFor="zoneInput" className="form-label">
+              Enter Actual Zone (1–9):
+            </label>
             <input
               type="number"
               id="zoneInput"
@@ -536,18 +535,16 @@ export const Training = () => {
 
           <button
             className="btn btn-outline-red-damask mt-3"
-            onClick={() => setShowStats(prev => !prev)}
+            onClick={() => setShowStats((prev) => !prev)}
           >
             {showStats ? 'Hide Statistics' : 'Show Statistics'}
           </button>
 
           {showStats && <Statistics responses={responses} />}
-
         </div>
       )}
 
       {alert && <Alert key={alert.id} message={alert.message} type={alert.type} />}
-
     </div>
   )
 }

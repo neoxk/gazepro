@@ -17,8 +17,7 @@ import trainChannel from '../preload/trainChannel'
 
 ffmpeg.setFfprobePath(ffprobeStatic.path)
 
-
-let mainWindow: BrowserWindow;
+let mainWindow: BrowserWindow
 function createWindow(): void {
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -35,11 +34,12 @@ function createWindow(): void {
     }
   })
 
-  mainWindow.setMenu(null);
-	mainWindow.setMenuBarVisibility(false);
+  mainWindow.setMenu(null)
+  mainWindow.setMenuBarVisibility(false)
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
+    mainWindow.webContents.openDevTools()
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -58,67 +58,77 @@ app.whenReady().then(() => {
   const initializer = new Initializer()
   initializer.initNew(Const.SETTINGS_PATH)
 
-  let trainWin: BrowserWindow
+  let trainWin: BrowserWindow | null
 
   const primaryDisplay = screen.getPrimaryDisplay()
-  let extDisplay = screen.getAllDisplays().find(display => display.id != primaryDisplay.id)
+  let extDisplay = screen.getAllDisplays().find((display) => display.id != primaryDisplay.id)
 
-  let fullscreen = true 
+  let fullscreen = true
   if (!extDisplay) {
     extDisplay = primaryDisplay
-    fullscreen = false 
+    fullscreen = false
   }
 
   /* TRAIN SCREEN COMMUNICATION -- MAIN -> TRAIN
       -------------------------
   */
 
-      ipcMain.on(trainChannel.LOAD_SCREEN, (_evt) => {
+  ipcMain.on(trainChannel.LOAD_SCREEN, (_evt) => {
+    trainWin = new BrowserWindow({
+      x: extDisplay.bounds.x,
+      y: extDisplay.bounds.y,
+      width: 600,
+      height: 450,
+      frame: false,
+      show: false,
+      webPreferences: {
+        preload: join(__dirname, '../preload/train.js'),
+        sandbox: false
+      }
+    })
 
-        trainWin = new BrowserWindow({
-          x: extDisplay.bounds.x, y: extDisplay.bounds.y,
-          width: 600, height: 450,
-          frame: false,
-          show: false,
-          webPreferences: {
-            preload: join(__dirname, '../preload/train.js'),
-            sandbox: false,
-          }
+    if (is.dev && process.env['ELECTRON_RENDERER_URL'])
+      trainWin.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/trainprojection')
+    else
+      trainWin.loadFile(path.join(__dirname, '../renderer/index.html'), {
+        hash: '/trainprojection'
       })
 
-      if (is.dev && process.env['ELECTRON_RENDERER_URL']) trainWin.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/#/trainprojection')
-      else trainWin.loadFile(path.join(__dirname, '../renderer/index.html'), {hash: '/trainprojection'})
+    trainWin.on('ready-to-show', () => trainWin!.show())
+  })
 
-      trainWin.on('ready-to-show', () => trainWin.show())
-      
-      })
+  ipcMain.handle(trainChannel.IS_FULLSCREEN, () => {
+    return fullscreen
+  })
 
-      ipcMain.handle(trainChannel.IS_FULLSCREEN, () => {
-        return fullscreen
-      })
+  ipcMain.on(
+    trainChannel.PLAY,
+    (_evt, vid_path: string, from: number, to: number, speed: number) => {
+      if (!trainWin) throw new Error('Trying to play but trainWin hasnt been created yet')
+      trainWin.webContents.send(trainChannel.PLAY, vid_path, from, to, speed)
+    }
+  )
 
-      ipcMain.on(trainChannel.PLAY, (_evt, vid_path: string, from: number, to: number, speed: number) => {
-        trainWin.webContents.send(trainChannel.PLAY, vid_path, from, to, speed)
-      })
+  ipcMain.on(trainChannel.PAUSE, (_evt) => {
+    if (!trainWin) throw new Error('Trying to pause but trainWin hasnt been created yet')
+    trainWin.webContents.send(trainChannel.PAUSE)
+  })
 
-      ipcMain.on(trainChannel.PAUSE, (_evt) => {
-          trainWin.webContents.send(trainChannel.PAUSE)
-      })
+  ipcMain.on(trainChannel.RESUME, () => {
+    if (!trainWin) throw new Error('Trying to resume but trainWin hasnt been created yet')
+    trainWin.webContents.send(trainChannel.RESUME)
+  })
 
-      ipcMain.on(trainChannel.RESUME, () => {
-        trainWin.webContents.send(trainChannel.RESUME)
-      })
+  ipcMain.on(trainChannel.EXIT, (_evt) => {
+    if (!trainWin) throw new Error('Trying to destroy but trainWin hasnt been created yet')
+    trainWin.destroy()
+    trainWin = null
+  })
 
-      ipcMain.on(trainChannel.EXIT, (_evt) => {
-        trainWin.destroy()
-      })
-
-      ipcMain.on(trainChannel.DELAY, (_evt, seconds: number) => {
-        console.log('main process delay: ' + seconds)
-        trainWin.webContents.send(trainChannel.DELAY, seconds)
-      })
-
- 
+  ipcMain.on(trainChannel.DELAY, (_evt, seconds: number) => {
+    if (!trainWin) throw new Error('Trying to delay but trainWin hasnt been created yet')
+    trainWin.webContents.send(trainChannel.DELAY, seconds)
+  })
 
   /* TRAIN SCREEN COMMUNICATION -- MAIN -> TRAIN
       -------------------------
@@ -126,11 +136,14 @@ app.whenReady().then(() => {
 
   // TRAIN -> MAIN (notificationst)
 
-      ipcMain.on(trainChannel.CLIP_FINISHED, () => mainWindow.webContents.send(trainChannel.CLIP_FINISHED))
-      ipcMain.on(trainChannel.SCREEN_LOADED, () => mainWindow.webContents.send(trainChannel.SCREEN_LOADED))
+  ipcMain.on(trainChannel.CLIP_FINISHED, () =>
+    mainWindow.webContents.send(trainChannel.CLIP_FINISHED)
+  )
+  ipcMain.on(trainChannel.SCREEN_LOADED, () =>
+    mainWindow.webContents.send(trainChannel.SCREEN_LOADED)
+  )
 
   // ------------------
-
 
   ipcMain.on('log', (_evt, msg) => {
     console.log(msg)
