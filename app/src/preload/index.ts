@@ -11,11 +11,13 @@ const trainAPI = {
   delay: (seconds: number) => ipcRenderer.send(trainChannel.DELAY, seconds),
   resume: () => ipcRenderer.send(trainChannel.RESUME),
 
-  onScreenLoaded: (cb) => ipcRenderer.on(trainChannel.SCREEN_LOADED, (_evt) => cb()),
+  onScreenLoaded: (cb) => {
+    ipcRenderer.on(trainChannel.SCREEN_LOADED, (_evt) => cb())
+  },
   onClipFinished: (cb) => ipcRenderer.on(trainChannel.CLIP_FINISHED, (_evt) => cb()),
 
-  offScreenLoaded: (cb) => ipcRenderer.removeListener(trainChannel.SCREEN_LOADED, cb),
-  offClipFinished: (cb) => ipcRenderer.removeListener(trainChannel.CLIP_FINISHED, cb)
+  offScreenLoaded: (cb) => ipcRenderer.removeAllListeners(trainChannel.SCREEN_LOADED),
+  offClipFinished: (cb) => ipcRenderer.removeAllListeners(trainChannel.CLIP_FINISHED)
 }
 
 const api = {

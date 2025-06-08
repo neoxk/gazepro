@@ -115,9 +115,9 @@ class TrainingController {
   public prevSeries = () => this.playClip({ series: -1, clips: 0 })
 
   public exit() {
-    this.trainAPI.exit()
     this.trainAPI.offScreenLoaded(this.playClip)
     this.trainAPI.offClipFinished(this.playClip)
+    this.trainAPI.exit()
     this.screenExists = false
   }
 

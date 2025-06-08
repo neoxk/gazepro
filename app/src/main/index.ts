@@ -74,6 +74,7 @@ app.whenReady().then(() => {
   */
 
   ipcMain.on(trainChannel.LOAD_SCREEN, (_evt) => {
+    console.log('load screen ' + _evt.processId)
     trainWin = new BrowserWindow({
       x: extDisplay.bounds.x,
       y: extDisplay.bounds.y,
@@ -97,35 +98,41 @@ app.whenReady().then(() => {
     trainWin.on('ready-to-show', () => trainWin!.show())
   })
 
-  ipcMain.handle(trainChannel.IS_FULLSCREEN, () => {
+  ipcMain.handle(trainChannel.IS_FULLSCREEN, (_evt) => {
+    _evt.processId
     return fullscreen
   })
 
   ipcMain.on(
     trainChannel.PLAY,
     (_evt, vid_path: string, from: number, to: number, speed: number) => {
+      console.log('play ' + _evt.processId)
       if (!trainWin) throw new Error('Trying to play but trainWin hasnt been created yet')
       trainWin.webContents.send(trainChannel.PLAY, vid_path, from, to, speed)
     }
   )
 
   ipcMain.on(trainChannel.PAUSE, (_evt) => {
+    console.log('pause ' + _evt.processId)
     if (!trainWin) throw new Error('Trying to pause but trainWin hasnt been created yet')
     trainWin.webContents.send(trainChannel.PAUSE)
   })
 
-  ipcMain.on(trainChannel.RESUME, () => {
+  ipcMain.on(trainChannel.RESUME, (_evt) => {
+    console.log('resume ' + _evt.processId)
     if (!trainWin) throw new Error('Trying to resume but trainWin hasnt been created yet')
     trainWin.webContents.send(trainChannel.RESUME)
   })
 
   ipcMain.on(trainChannel.EXIT, (_evt) => {
+    console.log('exit ' + _evt.processId)
     if (!trainWin) throw new Error('Trying to destroy but trainWin hasnt been created yet')
     trainWin.destroy()
     trainWin = null
   })
 
   ipcMain.on(trainChannel.DELAY, (_evt, seconds: number) => {
+    console.log('delay ' + _evt.processId)
     if (!trainWin) throw new Error('Trying to delay but trainWin hasnt been created yet')
     trainWin.webContents.send(trainChannel.DELAY, seconds)
   })
@@ -136,12 +143,15 @@ app.whenReady().then(() => {
 
   // TRAIN -> MAIN (notificationst)
 
-  ipcMain.on(trainChannel.CLIP_FINISHED, () =>
+  ipcMain.on(trainChannel.CLIP_FINISHED, (_evt) => {
+    console.log('clip finished ' + _evt.processId)
     mainWindow.webContents.send(trainChannel.CLIP_FINISHED)
-  )
-  ipcMain.on(trainChannel.SCREEN_LOADED, () =>
+  })
+  ipcMain.on(trainChannel.SCREEN_LOADED, (_evt) => {
+    console.log('Number of listeners for SCREEN_LOADED ')
+    console.log('screen loaded ' + _evt.processId)
     mainWindow.webContents.send(trainChannel.SCREEN_LOADED)
-  )
+  })
 
   // ------------------
 
