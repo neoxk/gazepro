@@ -1,0 +1,83 @@
+{
+    "videoEditor": "Video Editor",
+    "savedVideos": "Saved Videos",
+    "trainingModule": "Training Module",
+    "home": {
+        "trainMind": "Train the",
+        "mind": "Mind",
+        "sharpenReflex": "Sharpen the",
+        "reflex": "Reflex",
+        "selectSport": "Select Sport",
+        "handball": "Handball",
+        "videoFolder": "Video Folder",
+        "folderSelected": "Folder Selected",
+        "continue": "Continue"
+    },
+    "sidePanel": {
+        "videos": "Videos"
+    },
+    "openFolder": "Open Folder…",
+    "alerts": {
+        "noSeries": "Please add at least one series!",
+        "folderRequired": "Please select a folder before continuing."
+    },
+    "videoEditorComp": {
+        "framesPerSecond": "Frames Per Second",
+        "selectVideo": "Select a video from the left panel.",
+        "playbackSpeed": "Playback Speed",
+        "frame": "Frame",
+        "name": "Name",
+        "pre": "Pre (s)",
+        "post": "Post (s)",
+        "area": "Area",
+        "selectArea": "Select Area",
+        "position": "Position",
+        "selectPosition": "Select Position",
+        "saveCutout": "Save cutout",
+        "clickRemove": "Click to remove"
+    },
+    "hands": {
+        "shotHand": "Shot Hand",
+        "left": "Left",
+        "right": "Right"
+    },
+    "defended": {
+        "wasThereDefence": "Was There Defence?",
+        "yes": "Yes",
+        "no": "No"
+    },
+    "positions": {
+        "position": "Position",
+        "leftWing": "Left Wing",
+        "rightWing": "Right Wing",
+        "center": "Center",
+        "pivot": "Pivot",
+        "backLeft": "Back Left",
+        "backRight": "Back Right",
+        "unspecified": "Unspecified"
+    },
+    "savedVideosComp": {
+        "unspecified": "Unspecified",
+        "title": "Saved Videos",
+        "searchPlaceholder": "Search by title or source...",
+        "sortFilter": "Sort & Filter",
+        "simpleSort": "Simple Sort",
+        "advancedFilter": "Advanced Filter",
+        "selectAreas": "Select Areas",
+        "area": "Area",
+        "selectPositions": "Select Positions",
+        "duration": "Duration",
+        "source": "Source",
+        "details": "Details",
+        "snippetInfo": "Snippet Information",
+        "titleLabel": "Title",
+        "delete": "Delete",
+        "saveChanges": "Save Changes",
+        "sort": {
+            "title": "Title",
+            "duration": "Duration",
+            "position": "Position"
+        }
+    }
+
+}

@@ -1,7 +1,9 @@
 import React, { JSX, useEffect, useState } from 'react'
+import { Modal } from './Modal'
+import { useTranslation } from 'react-i18next'
+
 import handballMan from '@renderer/assets/images/handball-man.svg'
 import videoPlaceholder from '@renderer/assets/images/video-placeholder.png'
-import { Modal } from './Modal'
 
 interface SavedVideo {
   id: number
@@ -19,12 +21,13 @@ interface SavedVideo {
 }
 
 export const SavedVideos = (): JSX.Element => {
+  const { t } = useTranslation();
   const [cutouts, setCutouts] = useState<SavedVideo[]>([])
   const [playingVideoId, setPlayingVideoId] = useState<string | null>(null)
   const [sortOptions, setSortOptions] = useState<Record<string, boolean>>({
-    Title: false,
-    Duration: false,
-    Position: false
+    title: false,
+    duration: false,
+    position: false
   })
 
   const [selectedVideo, setSelectedVideo] = useState<SavedVideo | null>(null)
@@ -34,13 +37,24 @@ export const SavedVideos = (): JSX.Element => {
   const [selectedZones, setSelectedZones] = useState<number[]>([])
   const [selectedPositions, setSelectedPositions] = useState<string[]>([])
   const [allPositions] = useState<string[]>([
-    'Left Wing',
-    'Right Wing',
-    'Center',
-    'Pivot',
-    'Back Left',
-    'Back Right'
+    'positions.leftWing',
+    'positions.rightWing',
+    'positions.center',
+    'positions.pivot',
+    'positions.backLeft',
+    'positions.backRight'
   ])
+
+  const positionKeyMap: Record<string, string> = {
+    'Left Wing': 'positions.leftWing',
+    'Right Wing': 'positions.rightWing',
+    'Center': 'positions.center',
+    'Pivot': 'positions.pivot',
+    'Back Left': 'positions.backLeft',
+    'Back Right': 'positions.backRight',
+    'Unspecified': 'positions.unspecified'
+  };
+
 
   const [showAreas, setShowAreas] = useState(false)
   const [showPositions, setShowPositions] = useState(false)
@@ -81,9 +95,9 @@ export const SavedVideos = (): JSX.Element => {
           title: r.label,
           duration: `${mm}:${ss}`,
           source: filename,
-          position: r.position || 'Unspecified',
-          hand: r.shotHand || 'Unspecified',
-          defended: r.defended || 'Unspecified',
+          position: r.position || t('savedVideosComp.unspecified'),
+          hand: r.shotHand || t('savedVideosComp.unspecified'),
+          defended: r.defended || t('savedVideosComp.unspecified'),
           zone: r.zone,
           videoUrl: r.video_path,
           thumbnail_path: thumbUrl,
@@ -234,7 +248,7 @@ export const SavedVideos = (): JSX.Element => {
     })
 
   const grouped = filteredCutouts.reduce<Record<string, SavedVideo[]>>((acc, video) => {
-    const key = video.position || 'Unspecified'
+    const key = video.position || t('savedVideosComp.unspecified')
     if (!acc[key]) acc[key] = []
     acc[key].push(video)
     return acc
@@ -244,7 +258,7 @@ export const SavedVideos = (): JSX.Element => {
     <div className="position-relative">
       <img src={handballMan} alt="Handball Background" className="handball-bg" />
       <div className="container mt-5 text-dark position-relative" style={{ zIndex: 1 }}>
-        <h2 className="mb-4 text-dark">Saved Videos</h2>
+        <h2 className="mb-4 text-dark">{t('savedVideosComp.title')}</h2>
         {/* Header + Sort Dropdown */}
         <div className="row mb-4 g-3 align-items-center">
           <div className="col-md-9">
@@ -255,7 +269,7 @@ export const SavedVideos = (): JSX.Element => {
               <input
                 type="text"
                 className="form-control"
-                placeholder="Search by title or source..."
+                placeholder={t('savedVideosComp.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -270,7 +284,7 @@ export const SavedVideos = (): JSX.Element => {
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                Sort & Filter
+                {t('savedVideosComp.sortFilter')}
               </button>
               <div
                 className="dropdown-menu p-3 w-100"
@@ -280,24 +294,25 @@ export const SavedVideos = (): JSX.Element => {
                   setShowPositions(false)
                 }}
               >
-                <h6 className="dropdown-header">Simple Sort</h6>
-                {Object.keys(sortOptions).map((option) => (
-                  <div key={option} className="form-check">
+                <h6 className="dropdown-header">{t('savedVideosComp.simpleSort')}</h6>
+                {Object.entries(sortOptions).map(([key, value]) => (
+                  <div key={key} className="form-check">
                     <input
                       className="form-check-input"
                       type="checkbox"
-                      id={`sort-${option}`}
-                      checked={sortOptions[option]}
-                      onChange={() => handleSortToggle(option)}
+                      id={`sort-${key}`}
+                      checked={value}
+                      onChange={() => handleSortToggle(key)}
                     />
-                    <label className="form-check-label ms-2" htmlFor={`sort-${option}`}>
-                      {option}
+                    <label className="form-check-label ms-2" htmlFor={`sort-${key}`}>
+                      {t(`savedVideosComp.sort.${key}`)}
                     </label>
                   </div>
                 ))}
 
+
                 <hr className="dropdown-divider" />
-                <h6 className="dropdown-header">Advanced Filter</h6>
+                <h6 className="dropdown-header">{t('savedVideosComp.advancedFilter')}</h6>
 
                 <div className="dropdown mb-3">
                   <button
@@ -309,7 +324,7 @@ export const SavedVideos = (): JSX.Element => {
                       setShowPositions(false)
                     }}
                   >
-                    Select Areas
+                    {t('savedVideosComp.selectAreas')}
                   </button>
                   {showAreas && (
                     <ul
@@ -327,7 +342,7 @@ export const SavedVideos = (): JSX.Element => {
                             onChange={() => toggleZone(i + 1)}
                           />
                           <label className="form-check-label ms-2" htmlFor={`zone-${i + 1}`}>
-                            {i + 1} – Area
+                             {t('savedVideosComp.area')} {i + 1}
                           </label>
                         </li>
                       ))}
@@ -345,7 +360,7 @@ export const SavedVideos = (): JSX.Element => {
                       setShowAreas(false)
                     }}
                   >
-                    Select Positions
+                    {t('savedVideosComp.selectPositions')}
                   </button>
                   {showPositions && (
                     <ul
@@ -363,7 +378,7 @@ export const SavedVideos = (): JSX.Element => {
                             onChange={() => togglePosition(pos)}
                           />
                           <label className="form-check-label ms-2" htmlFor={`position-${pos}`}>
-                            {pos}
+                            {t(pos)}
                           </label>
                         </li>
                       ))}
@@ -378,7 +393,7 @@ export const SavedVideos = (): JSX.Element => {
         {/* Render grouped cutouts by position */}
         {Object.entries(grouped).map(([position, videos]) => (
           <div key={position} className="mb-5">
-            <h5 className="mb-3">{position}</h5>
+            <h5 className="mb-3">{t(positionKeyMap[position] || position)}</h5>
             <div className="d-flex flex-wrap gap-4">
               {videos.map((video) => (
                 <div key={video.id} className="card" style={{ width: '18rem' }}>
@@ -415,17 +430,17 @@ export const SavedVideos = (): JSX.Element => {
                   <div className="card-body">
                     <h5 className="card-title">{video.title}</h5>
                     <p className="card-text mb-1">
-                      <strong>Duration:</strong> {video.duration}
+                      <strong>{t('savedVideosComp.duration')}:</strong> {video.duration}
                     </p>
                     <p className="card-text mb-2">
-                      <strong>Source:</strong> {video.source}
+                      <strong>{t('savedVideosComp.source')}:</strong> {video.source}
                     </p>
                     <div className="d-flex align-items-center gap-2 mt-3">
                       <button
                         className="btn btn-light btn-red-damask flex-grow-1"
                         onClick={() => handleCardClick(video)}
                       >
-                        Details
+                        {t('savedVideosComp.details')}
                       </button>
                       <button
                         className="btn btn-outline-danger"
@@ -456,9 +471,9 @@ export const SavedVideos = (): JSX.Element => {
                     }
                   }}
                 />
-                <h5 className="mb-3">Snippet Information</h5>
+                <h5 className="mb-3">{t('savedVideosComp.snippetInfo')}</h5>
                 <div className="mb-3">
-                  <label className="form-label">Title</label>
+                  <label className="form-label">{t('savedVideosComp.titleLabel')}</label>
                   <input
                     type="text"
                     className="form-control"
@@ -467,7 +482,7 @@ export const SavedVideos = (): JSX.Element => {
                   />
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Duration</label>
+                  <label className="form-label">{t('savedVideosComp.duration')}</label>
                   <input
                     type="text"
                     className="form-control"
@@ -476,11 +491,11 @@ export const SavedVideos = (): JSX.Element => {
                   />
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Source</label>
+                  <label className="form-label">{t('savedVideosComp.source')}</label>
                   <input type="text" className="form-control" value={editedVideo.source} disabled />
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Area (Zone)</label>
+                  <label className="form-label">{t('savedVideosComp.area')}</label>
                   <input
                     type="number"
                     className="form-control"
@@ -489,7 +504,7 @@ export const SavedVideos = (): JSX.Element => {
                   />
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Shot Hand</label>
+                  <label className="form-label">{t('hands.shotHand')}</label>
                   <div className="d-flex gap-2">
                     {['left', 'right'].map((hand) => (
                       <div className="w-100" key={hand}>
@@ -513,7 +528,7 @@ export const SavedVideos = (): JSX.Element => {
                   </div>
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Was there defence?</label>
+                  <label className="form-label">{t('defended.wasThereDefence')}</label>
                   <div className="d-flex gap-2">
                     {['yes', 'no'].map((val) => (
                       <div className="w-100" key={val}>
@@ -534,7 +549,7 @@ export const SavedVideos = (): JSX.Element => {
                   </div>
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Position</label>
+                  <label className="form-label">{t('positions.position')}</label>
                   <div className="dropdown w-100">
                     <button
                       className="form-select text-start"
@@ -560,7 +575,7 @@ export const SavedVideos = (): JSX.Element => {
                             className="btn btn-outline-dark w-100"
                             htmlFor={`modal-pos-${pos}`}
                           >
-                            {pos}
+                            {t(pos)}
                           </label>
                         </li>
                       ))}
@@ -569,10 +584,10 @@ export const SavedVideos = (): JSX.Element => {
                 </div>
                 <div className="modal-footer d-flex justify-content-end gap-2 mt-5">
                   <button type="button" className="btn btn-light" onClick={handleDeleteModal}>
-                    Delete
+                    {t('savedVideosComp.delete')}
                   </button>
                   <button type="button" className="btn btn-red-damask" onClick={handleSaveChanges}>
-                    Save Changes
+                    {t('savedVideosComp.saveChanges')}
                   </button>
                 </div>
               </Modal>

@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 declare global {
   interface Window {
@@ -32,7 +33,15 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
   const [position, setPosition] = useState('')
   const [speed, setSpeed] = useState(1)
   const [isPaused, setIsPaused] = useState(false);
-  const allPositions = ['Left Wing', 'Right Wing', 'Center', 'Pivot', 'Back Left', 'Back Right']
+  const allPositions = [
+    'positions.leftWing',
+    'positions.rightWing',
+    'positions.center',
+    'positions.pivot',
+    'positions.backLeft',
+    'positions.backRight',
+  ];
+
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const [duration, setDuration] = useState(0)
@@ -45,6 +54,8 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
   const [, setFlagMode] = useState(false)
   const [flags, setFlags] = useState<number[]>([])
   const formRef = useRef<HTMLDivElement>(null)
+
+  const { t } = useTranslation();
 
   const videoName = selectedVideoPath ? selectedVideoPath.split(/[/\\]+/).pop() : null
 
@@ -234,12 +245,12 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
   return (
     <div className="ms-280 p-4 text-dark" style={{ marginLeft: '280px' }}>
       <div className="d-flex align-items-center mb-3">
-        <h2 className="text-dark me-4">{videoName ? videoName : 'Video Editor'}</h2>
+        <h2 className="text-dark me-4">{videoName ? videoName : t('videoEditor')}</h2>
       </div>
 
       {/* Video Player */}
       <div className="mb-3">
-        <h6 className="text-end">Frames Per Second: {frameRate}</h6>
+        <h6 className="text-end">{t('videoEditorComp.framesPerSecond')}: {Math.ceil(frameRate)}</h6>
         {selectedVideoPath ? (
           <video
             ref={videoRef}
@@ -253,7 +264,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
             <p className="text-muted">
               <i className="bi bi-camera-reels"></i>
               <br />
-              Select a video from the left panel.
+              {t('videoEditorComp.selectVideo')}
             </p>
           </div>
         )}
@@ -308,7 +319,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
                   transform: 'translateX(-50%)', 
                   cursor: 'pointer'
                 }}
-                title="Click to remove"
+                title={t('videoEditorComp.clickRemove')}
                 onClick={() => setFlags(flags.filter((t) => t !== time))}
               >
                 <i className="bi bi-pin-fill"></i>
@@ -327,7 +338,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
             zIndex: 10,
             cursor: 'pointer',
           }}
-          onMouseDown={(e) => {
+          onMouseDown={() => {
             const timeline = timelineRef.current;
             if (!videoRef.current || !timeline) return;
             const bounds = timeline.getBoundingClientRect();
@@ -351,24 +362,6 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
         />
       </div>
 
-      {/* Speed Slider */}
-      <div className="mt-4 w-25 ms-auto text-end">
-        <label className="form-label small">Playback Speed: {speed.toFixed(1)}x</label>
-        <input
-          type="range"
-          className="form-range"
-          min="0.5"
-          max="2"
-          step="0.1"
-          value={speed}
-          onChange={(e) => {
-            const newSpeed = parseFloat(e.target.value)
-            setSpeed(newSpeed)
-            if (videoRef.current) videoRef.current.playbackRate = newSpeed
-          }}
-        />
-      </div>
-
       {/* Custom Video Controls */}
       <div className="d-flex justify-content-center align-items-center gap-3 mb-3 mt-4">
         <button
@@ -379,7 +372,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
             if (vid) vid.currentTime = Math.max(0, vid.currentTime - 10)
           }}
         >
-          <i className="bi bi-skip-backward-fill"></i> 10s
+          <i className="bi bi-skip-backward-fill me-2"></i> 10s
         </button>
 
         <button
@@ -408,11 +401,9 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
             if (vid) vid.currentTime = Math.min(vid.duration, vid.currentTime + 10)
           }}
         >
-          10s <i className="bi bi-skip-forward-fill"></i>
+          10s <i className="ms-2 bi bi-skip-forward-fill"></i>
         </button>
-
       </div>
-
 
       {/* Frame Stepping Buttons */}
       <div className="d-flex justify-content-center align-items-center gap-3 m-4">
@@ -422,7 +413,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
           onClick={stepBackward}
           disabled={frameRate <= 0}
         >
-          <i className="bi bi-caret-left"></i> Frame
+          <i className="bi bi-caret-left"></i> {t('videoEditorComp.frame')}
         </button>
         
         <button
@@ -450,8 +441,26 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
           onClick={stepForward}
           disabled={frameRate <= 0}
         >
-          Frame <i className="bi bi-caret-right"></i>
+          {t('videoEditorComp.frame')} <i className="bi bi-caret-right"></i>
         </button>
+      </div>
+
+      {/* Speed Slider */}
+      <div className="mt-4 w-25 ms-auto text-end">
+        <label className="form-label small">{t('videoEditorComp.playbackSpeed')}: {speed.toFixed(1)}x</label>
+        <input
+          type="range"
+          className="form-range"
+          min="0.5"
+          max="2"
+          step="0.1"
+          value={speed}
+          onChange={(e) => {
+            const newSpeed = parseFloat(e.target.value)
+            setSpeed(newSpeed)
+            if (videoRef.current) videoRef.current.playbackRate = newSpeed
+          }}
+        />
       </div>
 
       {/* Cutout Form */}
@@ -464,7 +473,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
         >
           <div className="row g-3 mt-5 align-items-end">
             <div className="col-md-4">
-              <label className="form-label text-dark">Name:</label>
+              <label className="form-label text-dark">{t('videoEditorComp.name')}:</label>
               <input
                 className="form-control"
                 value={label}
@@ -472,7 +481,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
               />
             </div>
             <div className="col-md-2">
-              <label className="form-label">Pre (s):</label>
+              <label className="form-label">{t('videoEditorComp.pre')}:</label>
               <input
                 type="number"
                 step="0.1"
@@ -484,7 +493,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
             </div>
 
             <div className="col-md-2">
-              <label className="form-label">Post (s):</label>
+              <label className="form-label">{t('videoEditorComp.post')}:</label>
               <input
                 type="number"
                 step="0.1"
@@ -495,7 +504,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
               />
             </div>
             <div className="col-md-4">
-              <label className="form-label">Area:</label>
+              <label className="form-label">{t('videoEditorComp.area')}:</label>
               <div className="dropdown w-100">
                 <button
                   className="form-select text-start"
@@ -503,7 +512,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  {zone ? `Area ${zone}` : 'Select Area'}
+                  {zone ? `${t('videoEditorComp.area')} ${zone}` : t('videoEditorComp.selectArea')}
                 </button>
                 <ul
                   className="dropdown-menu px-3 py-2 w-100"
@@ -530,7 +539,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
               </div>
             </div>
             <div className="col-md-3">
-              <label className="form-label">Position:</label>
+              <label className="form-label">{t('videoEditorComp.position')}:</label>
               <div className="dropdown w-100">
                 <button
                   className="form-select text-start"
@@ -538,7 +547,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  {position || 'Select Position'}
+                  {position || t('videoEditorComp.selectPosition')}
                 </button>
                 <ul 
                   className="dropdown-menu px-3 py-2 w-100" 
@@ -557,7 +566,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
                         onChange={() => setPosition(pos)}
                       />
                       <label className="btn btn-outline-dark w-100" htmlFor={`pos-${pos}`}>
-                        {pos}
+                        {t(pos)}
                       </label>
                     </li>
                   ))}
@@ -565,7 +574,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
               </div>
             </div>
             <div className="col-md-3">
-              <label className="form-label d-block">Shot Hand:</label>
+              <label className="form-label d-block">{t('hands.shotHand')}:</label>
               <div className="d-flex gap-2">
                 <div className="w-100">
                   <input
@@ -578,7 +587,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
                     onChange={() => setShotHand('left')}
                   />
                   <label className="btn btn-outline-dark w-100" htmlFor="hand-left">
-                    Left
+                    {t('hands.left')}
                   </label>
                 </div>
                 <div className="w-100">
@@ -592,14 +601,14 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
                     onChange={() => setShotHand('right')}
                   />
                   <label className="btn btn-outline-dark w-100" htmlFor="hand-right">
-                    Right
+                    {t('hands.right')}
                   </label>
                 </div>
               </div>
             </div>
 
             <div className="col-md-3">
-              <label className="form-label d-block">Was There Defence?</label>
+              <label className="form-label d-block">{t('defended.wasThereDefence')}</label>
               <div className="d-flex gap-2">
                 <div className="w-100">
                   <input
@@ -612,7 +621,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
                     onChange={() => setDefended('yes')}
                   />
                   <label className="btn btn-outline-dark w-100" htmlFor="defence-yes">
-                    Yes
+                    {t('defended.yes')}
                   </label>
                 </div>
                 <div className="w-100">
@@ -626,13 +635,13 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
                     onChange={() => setDefended('no')}
                   />
                   <label className="btn btn-outline-dark w-100" htmlFor="defence-no">
-                    No
+                    {t('defended.no')}
                   </label>
                 </div>
               </div>
             </div>
             <div className="col-md-3">
-              <button className="btn btn-red-damask w-100">Save cutout</button>
+              <button className="btn btn-red-damask w-100">{t('videoEditorComp.saveCutout')}</button>
             </div>
           </div>
         </form>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next'
 
 import logo from '@renderer/assets/images/logo-2.png';
 import usFlag from '@renderer/assets/images/us.png';
@@ -14,11 +15,13 @@ interface Language {
 export const NavBar = () => {
   const navigate = useNavigate();
 
+  const { t, i18n } = useTranslation()
+
   const navItems = [
-    { label: 'Video Editor', path: '/' },
-    { label: 'Saved Videos', path: '/saved' },
-    { label: 'Training Module', path: '/training' },
-  ];
+    { label: t('videoEditor'), path: '/' },
+    { label: t('savedVideos'), path: '/saved' },
+    { label: t('trainingModule'), path: '/training' },
+  ]
 
   const languages: Language[] = [
     { code: 'en', name: 'English', flag: usFlag },
@@ -32,6 +35,11 @@ export const NavBar = () => {
     setActiveLabel(label);
     navigate(path);
   };
+  
+  const handleLanguageChange = (lang: Language) => {
+    setSelectedLanguage(lang)
+    i18n.changeLanguage(lang.code)
+  }
 
   return (
     <nav className="navbar bg-dark text-white px-4 shadow-sm fixed-top" style={{ height: '64px', zIndex: 10 }}>
@@ -73,7 +81,7 @@ export const NavBar = () => {
               <li key={lang.code}>
                 <button
                   className="dropdown-item d-flex align-items-center"
-                  onClick={() => setSelectedLanguage(lang)}
+                  onClick={() => handleLanguageChange(lang)}
                 >
                   <img src={lang.flag} alt={lang.name} width={16} height={16} className="me-2" />
                   {lang.name}

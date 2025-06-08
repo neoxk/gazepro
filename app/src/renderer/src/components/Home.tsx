@@ -1,4 +1,5 @@
 import { JSX, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import man from '../assets/images/handball-man.svg';
 import logo from '@renderer/assets/images/logo.png';
@@ -17,8 +18,10 @@ interface HomeProps {
 }
 
 export const Home = ({ onContinue, onOpenFolder }: HomeProps): JSX.Element => {
+    const { t, i18n } = useTranslation();
+    
     const [selectedSport, setSelectedSport] = useState('Handball');
-    const [folderSelected, setFolderSelected] = useState(false); // placeholder for folder logic
+    const [folderSelected, setFolderSelected] = useState(false);
     
     const handleFolderSelect = async () => {
         const result = await onOpenFolder();
@@ -36,6 +39,11 @@ export const Home = ({ onContinue, onOpenFolder }: HomeProps): JSX.Element => {
     ];
     
     const [selectedLanguage, setSelectedLanguage] = useState<Language>(languages[0]);
+
+    const handleLanguageChange = (lang: Language) => {
+        setSelectedLanguage(lang);
+        i18n.changeLanguage(lang.code);
+    };
 
     return (
         <>
@@ -56,7 +64,7 @@ export const Home = ({ onContinue, onOpenFolder }: HomeProps): JSX.Element => {
                         <li key={lang.code}>
                             <button
                             className="dropdown-item d-flex align-items-center"
-                            onClick={() => setSelectedLanguage(lang)}
+                            onClick={() => handleLanguageChange(lang)}
                             >
                             <img src={lang.flag} alt={lang.name} width={16} height={16} className="me-2" />
                             {lang.name}
@@ -73,30 +81,30 @@ export const Home = ({ onContinue, onOpenFolder }: HomeProps): JSX.Element => {
                     <img src={logo} alt="Logo" width={100} className="mb-2" />
                     <h1 className="mb-3 fw-bold">GazePro</h1>
                     <h6 className="fw-normal">
-                        Train the <span className="text-red-damask">Mind.</span> Sharpen the <span className="text-red-damask">Reflex.</span>
+                        {t('home.trainMind')} <span className="text-red-damask">{t('home.mind')}.</span> {t('home.sharpenReflex')} <span className="text-red-damask">{t('home.reflex')}.</span>
                     </h6>
 
                     <form onSubmit={(e) => e.preventDefault()}>
                         <div className="mb-3 mt-5 text-start">
-                            <label className="form-label">Select Sport:</label>
+                            <label className="form-label">{t('home.selectSport')}:</label>
                             <select
                                 className="form-select"
                                 value={selectedSport}
                                 onChange={(e) => setSelectedSport(e.target.value)}
                                 >
-                                <option value="Handball">Handball</option>
+                                <option value="Handball">{t('home.handball')}</option>
                             </select>
                         </div>
 
                         <div className="mb-3 text-start">
-                            <label className="form-label">Video Folder:</label>
+                            <label className="form-label">{t('home.videoFolder')}:</label>
                             <button
                                 type="button"
                                 className="btn btn-red-damask w-100"
                                 onClick={handleFolderSelect}
                                 >
                                 <i className="bi bi-folder2-open me-2" />
-                                {folderSelected ? "Folder Selected" : "Open Folder…"}
+                                {folderSelected ? t('home.folderSelected') : t('openFolder')}
                             </button>
                         </div>
 
@@ -106,7 +114,7 @@ export const Home = ({ onContinue, onOpenFolder }: HomeProps): JSX.Element => {
                             onClick={handleContinue}
                             disabled={!folderSelected}
                         >
-                            Continue <i className="bi bi-arrow-right ms-2" />
+                            {t('home.continue')} <i className="bi bi-arrow-right ms-2" />
                         </button>
                     </form>
                 </div>
