@@ -36,14 +36,14 @@ export const SavedVideos = (): JSX.Element => {
 
   const [selectedZones, setSelectedZones] = useState<number[]>([])
   const [selectedPositions, setSelectedPositions] = useState<string[]>([])
-  const [allPositions] = useState<string[]>([
-    'positions.leftWing',
-    'positions.rightWing',
-    'positions.center',
-    'positions.pivot',
-    'positions.backLeft',
-    'positions.backRight'
-  ])
+  const allPositions = [
+    'leftWing',
+    'rightWing',
+    'center',
+    'pivot',
+    'backLeft',
+    'backRight'
+  ]
 
   const positionKeyMap: Record<string, string> = {
     'Left Wing': 'positions.leftWing',
@@ -521,7 +521,7 @@ export const SavedVideos = (): JSX.Element => {
                           className="btn btn-outline-dark w-100"
                           htmlFor={`modal-hand-${hand}`}
                         >
-                          {hand.charAt(0).toUpperCase() + hand.slice(1)}
+                          {t(`hands.${hand}`)}
                         </label>
                       </div>
                     ))}
@@ -542,7 +542,7 @@ export const SavedVideos = (): JSX.Element => {
                           onChange={() => handleEditChange('defended', val)}
                         />
                         <label className="btn btn-outline-dark w-100" htmlFor={`modal-def-${val}`}>
-                          {val.charAt(0).toUpperCase() + val.slice(1)}
+                          {t(`defended.${val}`)}
                         </label>
                       </div>
                     ))}
@@ -557,7 +557,9 @@ export const SavedVideos = (): JSX.Element => {
                       data-bs-toggle="dropdown"
                       aria-expanded="false"
                     >
-                      {editedVideo.position || 'Select Position'}
+                       {editedVideo.position
+                          ? t(`positions.${editedVideo.position.replace(/\s+/g, '').charAt(0).toLowerCase() + editedVideo.position.replace(/\s+/g, '').slice(1)}`)
+                          : t('positions.selectPosition')}
                     </button>
                     <ul className="dropdown-menu px-3 py-2 w-100" style={{ minWidth: '250px' }}>
                       {allPositions.map((pos) => (
@@ -575,7 +577,7 @@ export const SavedVideos = (): JSX.Element => {
                             className="btn btn-outline-dark w-100"
                             htmlFor={`modal-pos-${pos}`}
                           >
-                            {t(pos)}
+                            {t(`positions.${pos}`)}
                           </label>
                         </li>
                       ))}
@@ -592,7 +594,6 @@ export const SavedVideos = (): JSX.Element => {
                 </div>
               </Modal>
             )}
-
             <hr className="mt-5" />
           </div>
         ))}

@@ -1,4 +1,4 @@
-import { JSX, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import man from '../assets/images/handball-man.svg';
@@ -38,12 +38,19 @@ export const Home = ({ onContinue, onOpenFolder }: HomeProps): JSX.Element => {
         { code: 'si', name: 'Slovenščina', flag: siFlag },
     ];
     
-    const [selectedLanguage, setSelectedLanguage] = useState<Language>(languages[0]);
+    const [selectedLanguage, setSelectedLanguage] = useState<Language>(
+        languages.find((l) => l.code === i18n.language) || languages[0]
+    );
 
     const handleLanguageChange = (lang: Language) => {
         setSelectedLanguage(lang);
         i18n.changeLanguage(lang.code);
     };
+
+    useEffect(() => {
+        const lang = languages.find((l) => l.code === i18n.language)
+        if (lang) setSelectedLanguage(lang)
+    }, [i18n.language])
 
     return (
         <>

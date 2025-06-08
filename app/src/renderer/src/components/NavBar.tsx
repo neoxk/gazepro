@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next'
 
@@ -28,7 +28,10 @@ export const NavBar = () => {
     { code: 'si', name: 'Slovenščina', flag: siFlag },
   ];
 
-  const [selectedLanguage, setSelectedLanguage] = useState<Language>(languages[0]);
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>(
+    languages.find((l) => l.code === i18n.language) || languages[0]
+  );
+
   const [activeLabel, setActiveLabel] = useState(navItems[0].label);
 
   const handleClick = (label: string, path: string) => {
@@ -40,6 +43,11 @@ export const NavBar = () => {
     setSelectedLanguage(lang)
     i18n.changeLanguage(lang.code)
   }
+
+  useEffect(() => {
+    const found = languages.find((l) => l.code === i18n.language);
+    if (found) setSelectedLanguage(found);
+  }, [i18n.language]);
 
   return (
     <nav className="navbar bg-dark text-white px-4 shadow-sm fixed-top" style={{ height: '64px', zIndex: 10 }}>

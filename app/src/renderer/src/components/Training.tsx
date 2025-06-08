@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
+import { Statistics } from './Statistics'
+import { Alert } from './Alert'
+import { useTranslation } from 'react-i18next'
 
 import handballMan from '@renderer/assets/images/handball-man.svg'
 import TrainingController from '../core/TrainingController'
-import { Statistics } from './Statistics'
-import { Alert } from './Alert'
 
 interface cutoutrow {
   video_path: string
@@ -45,11 +46,13 @@ export const Training = () => {
   const [showStats, setShowStats] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
 
-  const allPositions = ['Left Wing', 'Right Wing', 'Center', 'Pivot', 'Back Left', 'Back Right']
-  const allHands = ['Left', 'Right']
-  const allDefences = ['Yes', 'No']
+  const allPositions = ['leftWing', 'rightWing', 'center', 'pivot', 'backLeft', 'backRight'];
+  const allHands = ['left', 'right'];
+  const allDefences = ['yes', 'no'];
 
   const trainingControllerRef = useRef<TrainingController>(null)
+  
+  const { t } = useTranslation();
 
   const addSeries = () => {
     setSeriesFilters([...seriesFilters, { zones: [], positions: [], hands: [], defences: [] }])
@@ -118,7 +121,7 @@ export const Training = () => {
     if (seriesFilters.length === 0) {
       setAlert({
         id: Date.now(),
-        message: 'Please add at least one series!',
+        message: t('alerts.noSeries'),
         type: 'danger'
       })
 
@@ -136,7 +139,7 @@ export const Training = () => {
     if (unfiltered) {
       setAlert({
         id: Date.now(),
-        message: 'Each series must have at least one filter set.',
+        message: t('alerts.seriesFilterSet'),
         type: 'danger'
       })
       return
@@ -187,12 +190,12 @@ export const Training = () => {
   return (
     <div className="container mt-5 text-dark position-relative" style={{ zIndex: 1 }}>
       <img src={handballMan} alt="Handball Background" className="handball-bg" />
-      <h2 className="mb-3 text-dark">Training Module</h2>
+      <h2 className="mb-3 text-dark">{t('trainingModule')}</h2>
 
       <form onSubmit={(e) => e.preventDefault()}>
         <div className="row mb-4">
           <div className="col-md-2">
-            <label>Clips per Series</label>
+            <label>{t('trainingComp.clipsPerSeries')}</label>
             <input
               type="number"
               className="form-control"
@@ -202,7 +205,7 @@ export const Training = () => {
             />
           </div>
           <div className="col-md-2">
-            <label>Speed</label>
+            <label>{t('trainingComp.speed')}</label>
             <input
               type="number"
               className="form-control"
@@ -214,7 +217,7 @@ export const Training = () => {
             />
           </div>
           <div className="col-md-3">
-            <label>Pause between Clips (s)</label>
+            <label>{t('trainingComp.pauseClips')}</label>
             <input
               type="number"
               className="form-control"
@@ -224,7 +227,7 @@ export const Training = () => {
             />
           </div>
           <div className="col-md-3">
-            <label>Pause between Series (s)</label>
+            <label>{t('trainingComp.pauseSeries')}</label>
             <input
               type="number"
               className="form-control"
@@ -236,7 +239,7 @@ export const Training = () => {
           <div className="col-md-2">
             <br />
             <button className="btn btn-outline-red-damask mb-3 w-100" onClick={addSeries}>
-              Add Series
+              {t('trainingComp.addSeries')}
             </button>
           </div>
         </div>
@@ -249,10 +252,10 @@ export const Training = () => {
               aria-label="Close"
               onClick={() => removeSeries(idx)}
             ></button>
-            <h5 className="mb-3">Series {idx + 1}</h5>
+            <h5 className="mb-3">{t('trainingComp.series')} {idx + 1}</h5>
             <div className="row align-items-end">
               <div className="col-md-6">
-                <label className="form-label">Position:</label>
+                <label className="form-label">{t('positions.position')}:</label>
                 <div className="dropdown w-100">
                   <button
                     className="form-select text-start"
@@ -260,7 +263,7 @@ export const Training = () => {
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                   >
-                    {getDropdownText(filter.positions, 'Select Position(s)')}
+                    {getDropdownText(filter.positions.map(p => t(`positions.${p}`)), t('trainingComp.selectPositions'))}
                   </button>
                   <ul
                     className="dropdown-menu px-3 py-2 w-100"
@@ -281,7 +284,7 @@ export const Training = () => {
                           className="btn btn-outline-dark w-100"
                           htmlFor={`position-${idx}-${pos}`}
                         >
-                          {pos}
+                          {t(`positions.${pos}`)}
                         </label>
                       </li>
                     ))}
@@ -291,7 +294,7 @@ export const Training = () => {
                         className="btn btn-outline-dark w-100"
                         onClick={() => selectAllFilter(idx, 'positions', allPositions)}
                       >
-                        Select All
+                        {t('trainingComp.selectAll')}
                       </button>
                     </li>
                   </ul>
@@ -299,7 +302,7 @@ export const Training = () => {
               </div>
 
               <div className="col-md-6">
-                <label className="form-label">Area:</label>
+                <label className="form-label">{t('positions.position')}:</label>
                 <div className="dropdown w-100">
                   <button
                     className="form-select text-start"
@@ -307,7 +310,7 @@ export const Training = () => {
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                   >
-                    {getDropdownText(filter.zones, 'Select Area(s)')}
+                    {getDropdownText(filter.zones, t('trainingComp.selectAreas'))}
                   </button>
                   <ul
                     className="dropdown-menu px-3 py-2 w-100"
@@ -338,7 +341,7 @@ export const Training = () => {
                         className="btn btn-sm btn-outline-dark w-100"
                         onClick={() => selectAllFilter(idx, 'zones', [1, 2, 3, 4, 5, 6, 7, 8, 9])}
                       >
-                        Select All
+                        {t('trainingComp.selectAll')}
                       </button>
                     </li>
                   </ul>
@@ -346,7 +349,7 @@ export const Training = () => {
               </div>
 
               <div className="col-md-6 mt-3">
-                <label className="form-label d-block">Shot Hand:</label>
+                <label className="form-label d-block">{t('hands.shotHand')}:</label>
                 <div className="d-flex gap-2">
                   {allHands.map((hand) => (
                     <div className="w-100" key={hand}>
@@ -359,7 +362,7 @@ export const Training = () => {
                         onChange={() => updateFilter(idx, 'hands', hand)}
                       />
                       <label className="btn btn-outline-dark w-100" htmlFor={`hand-${idx}-${hand}`}>
-                        {hand}
+                        {t(`hands.${hand}`)}
                       </label>
                     </div>
                   ))}
@@ -367,7 +370,7 @@ export const Training = () => {
               </div>
 
               <div className="col-md-6 mt-3">
-                <label className="form-label d-block">Was There Defence?</label>
+                <label className="form-label d-block">{t('defended.wasThereDefence')}</label>
                 <div className="d-flex gap-2">
                   {allDefences.map((d) => (
                     <div className="w-100" key={d}>
@@ -380,7 +383,7 @@ export const Training = () => {
                         onChange={() => updateFilter(idx, 'defences', d)}
                       />
                       <label className="btn btn-outline-dark w-100" htmlFor={`def-${idx}-${d}`}>
-                        {d}
+                        {t(`defended.${d}`)}
                       </label>
                     </div>
                   ))}
@@ -398,12 +401,12 @@ export const Training = () => {
               onClick={handleStart}
               disabled={started}
             >
-              Start Training
+              {t('trainingComp.startTraining')}
             </button>
           </div>
           <div className="col-md-6">
             <button type="button" className="btn btn-outline-dark w-100" onClick={handleRestart}>
-              Restart
+              {t('trainingComp.restart')}
             </button>
           </div>
         </div>
@@ -415,13 +418,13 @@ export const Training = () => {
             className="btn btn-outline-dark border-0 px-4"
             onClick={() => trainingControllerRef.current?.prevSeries()}
           >
-            Previous Series
+            {t('trainingComp.prevSeries')}
           </button>
           <button
             className="btn btn-outline-dark border-0 px-4"
             onClick={() => trainingControllerRef.current?.prevClip()}
           >
-            Previous Clip
+            {t('trainingComp.prevClip')}
           </button>
 
           <button
@@ -444,23 +447,23 @@ export const Training = () => {
             className="btn btn-outline-dark border-0 px-4"
             onClick={() => trainingControllerRef.current?.nextClip()}
           >
-            Next Clip
+            {t('trainingComp.nextClip')}
           </button>
           <button
             className="btn btn-outline-dark border-0 px-4"
             onClick={() => trainingControllerRef.current?.nextSeries()}
           >
-            Next Series
+           {t('trainingComp.nextSeries')}
           </button>
         </div>
       )}
 
       {started && currentZone !== null && (
         <div className="alert alert-danger mt-4">
-          <strong>Expected Zone:</strong> {currentZone}
+          <strong>{t('trainingComp.expected')}:</strong> {currentZone}
           <div className="mt-2">
             <label htmlFor="zoneInput" className="form-label">
-              Enter Actual Zone (1–9):
+              {t('trainingComp.enterActual')}
             </label>
             <input
               type="number"
@@ -491,17 +494,17 @@ export const Training = () => {
 
       {!started && responses.length > 0 && (
         <div className="card mt-4 p-3">
-          <h4>Review Responses</h4>
+          <h4>{t('trainingComp.reviewResponses')}</h4>
           <div className="table-responsive">
             <table className="table table-bordered mt-3">
               <thead className="bg-light">
                 <tr>
                   <th>#</th>
-                  <th>Expected Zone</th>
-                  <th>Actual Zone</th>
-                  <th>Label</th>
-                  <th>Position</th>
-                  <th>Series</th>
+                  <th>{t('trainingComp.expected')}</th>
+                  <th>{t('trainingComp.actual')}</th>
+                  <th>{t('trainingComp.label')}</th>
+                  <th>{t('positions.position')}</th>
+                  <th>{t('trainingComp.series')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -538,7 +541,7 @@ export const Training = () => {
             className="btn btn-outline-red-damask mt-3"
             onClick={() => setShowStats((prev) => !prev)}
           >
-            {showStats ? 'Hide Statistics' : 'Show Statistics'}
+            {showStats ? t('trainingComp.hideStats') : t('trainingComp.showStats')}
           </button>
 
           {showStats && <Statistics responses={responses} />}

@@ -19,7 +19,8 @@
     "openFolder": "Odpri mapo…",
     "alerts": {
         "noSeries": "Dodaj vsaj eno serijo!",
-        "folderRequired": "Pred nadaljevanjem izberi mapo."
+        "folderRequired": "Pred nadaljevanjem izberi mapo.",
+        "seriesFilterSet": "Vsaka serija mora imeti vsaj en nabor filtrov."
     },
     "videoEditorComp": {
         "framesPerSecond": "Sličic na sekundo",
@@ -78,7 +79,29 @@
             "duration": "Trajanje",
             "position": "Položaj"
         }
-
+    },
+    "trainingComp": {
+        "clipsPerSeries": "Izrezki na serijo",
+        "speed": "Hitrost",
+        "pauseClips": "Premor med izrezki (s)",
+        "pauseSeries": "Premor med serijami (s)",
+        "addSeries": "Dodaj serijo",
+        "series": "Serija",
+        "selectAll": "Izberi vse",
+        "selectAreas": "Izberi območje(-a)",
+        "selectPositions": "Izberi položaj(e)",
+        "startTraining": "Začni trening",
+        "restart": "Ponovni zagon",
+        "prevSeries": "Prejšnja serija",
+        "prevClip": "Prejšnji izrezek",
+        "nextSeries": "Naslednja serija",
+        "nextClip": "Naslednji izrezek",
+        "expected": "Pričakovano območje",
+        "enterActual": "Vnesi dejansko območje (1–9)",
+        "reviewResponses": "Preglej odgovore",
+        "actual": "Dejansko območje",
+        "label": "Oznaka",
+        "hideStats": "Skrij statistiko",
+        "showStats": "Prikaži statistiko"
     }
-
 }

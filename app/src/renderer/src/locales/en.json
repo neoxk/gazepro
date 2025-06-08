@@ -19,7 +19,8 @@
     "openFolder": "Open Folder…",
     "alerts": {
         "noSeries": "Please add at least one series!",
-        "folderRequired": "Please select a folder before continuing."
+        "folderRequired": "Please select a folder before continuing.",
+        "seriesFilterSet": "Each series must have at least one filter set."
     },
     "videoEditorComp": {
         "framesPerSecond": "Frames Per Second",
@@ -78,6 +79,36 @@
             "duration": "Duration",
             "position": "Position"
         }
+    },
+    "trainingComp": {
+        "clipsPerSeries": "Clips per Series",
+        "speed": "Speed",
+        "pauseClips": "Pause between Clips (s)",
+        "pauseSeries": "Pause between Series (s)",
+        "addSeries": "Add Series",
+        "series": "Series",
+        "selectAll": "Select All",
+        "selectAreas": "Select Area(s)",
+        "selectPositions": "Select Position(s)",
+        "startTraining": "Start Training",
+        "restart": "Restart",
+        "prevSeries": "Previous Series",
+        "prevClip": "Previous Clip,",
+        "nextSeries": "Next Series",
+        "nextClip": "Previous Clip",
+        "expected": "Expected Zone",
+        "enterActual": "Enter Actual Zone (1–9)",
+        "reviewResponses": "Review Responses",
+        "actual": "Actual Zone",
+        "label": "Label",
+        "hideStats": "Hide Statistics",
+        "showStats": "Show Statistics"
+    },
+    "statisticsComp": {
+        "correct": "Correct",
+        "incorrect": "Incorrect",
+        "overallAccuracy": "Overall Accuracy",
+        "series": "Series"
     }
 
 }

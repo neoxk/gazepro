@@ -1,4 +1,5 @@
 import { JSX } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Bar } from 'react-chartjs-2'
 import {
@@ -25,6 +26,9 @@ interface StatsProps {
 }
 
 export const Statistics = ({ responses }: StatsProps) : JSX.Element => {
+
+    const { t } = useTranslation();
+
     const totalCorrect = responses.filter(r => r.expected === r.actual).length
     const totalIncorrect = responses.length - totalCorrect
 
@@ -32,12 +36,12 @@ export const Statistics = ({ responses }: StatsProps) : JSX.Element => {
         labels: ['Snippets'],
         datasets: [
         {
-            label: 'Correct',
+            label: t('statisticsComp.correct'),
             data: [totalCorrect],
             backgroundColor: 'rgba(75, 192, 192, 0.6)',
         },
         {
-            label: 'Incorrect',
+            label: t('statisticsComp.incorrect'),
             data: [totalIncorrect],
             backgroundColor: 'rgba(255, 99, 132, 0.6)',
         },
@@ -52,7 +56,7 @@ export const Statistics = ({ responses }: StatsProps) : JSX.Element => {
 
     return (
     <div className="my-5">
-        <h3 className="text-center mb-4">Overall Accuracy</h3>
+        <h3 className="text-center mb-4">{t('statisticsComp.overallAccuracy')}</h3>
         <div style={{ maxWidth: '700px', margin: 'auto' }}>
             <Bar data={overallData} />
         </div>
@@ -71,19 +75,19 @@ export const Statistics = ({ responses }: StatsProps) : JSX.Element => {
 
                 return (
                     <div key={seriesNum} className="col-md-6 my-4">
-                        <h5 className="text-center">Series {seriesNum}</h5>
+                        <h5 className="text-center">{t('statisticsComp.series')} {seriesNum}</h5>
                         <div style={{ maxWidth: '700px', margin: 'auto' }}>
                             <Bar
                                 data={{
                                     labels,
                                     datasets: [
                                     {
-                                        label: 'Correct',
+                                        label: t('statisticsComp.correct'),
                                         data: correct,
                                         backgroundColor: 'rgba(54, 162, 235, 0.6)',
                                     },
                                     {
-                                        label: 'Incorrect',
+                                        label: t('statisticsComp.incorrect'),
                                         data: incorrect,
                                         backgroundColor: 'rgba(255, 159, 64, 0.6)',
                                     },
