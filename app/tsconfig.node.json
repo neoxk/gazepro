@@ -6,6 +6,8 @@
     "src/renderer/src/**/*"
   ],
   "compilerOptions": {
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "composite": true,
     "types": ["electron-vite/node"]
   }
