@@ -69,7 +69,7 @@ To deliver a training platform that helps handball coaches create perceptual-rea
 |----------------|-----------------------------|
 | Framework      | Electron + Vite             |
 | Frontend       | React, TypeScript           |
-| Styling        | TailwindCSS, Bootstrap      |
+| Styling        | Bootstrap                   |
 | Icons          | Bootstrap Icons             |
 | State          | React Hooks                 |
 | Localization   | i18next                     |
