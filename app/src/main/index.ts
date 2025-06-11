@@ -17,6 +17,8 @@ import trainChannel from '../preload/trainChannel'
 
 ffmpeg.setFfprobePath(ffprobeStatic.path)
 
+const iconPath = path.join(__dirname, '../../resources/icons/png/64x64.png')
+
 let mainWindow: BrowserWindow
 function createWindow(): void {
   mainWindow = new BrowserWindow({
@@ -27,7 +29,7 @@ function createWindow(): void {
     resizable: true,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    icon: iconPath,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false

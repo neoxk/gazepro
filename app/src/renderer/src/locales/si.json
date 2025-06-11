@@ -20,7 +20,9 @@
     "alerts": {
         "noSeries": "Dodaj vsaj eno serijo!",
         "folderRequired": "Pred nadaljevanjem izberi mapo.",
-        "seriesFilterSet": "Vsaka serija mora imeti vsaj en nabor filtrov."
+        "seriesFilterSet": "Vsaka serija mora imeti vsaj en nabor filtrov.",
+        "flagInfo": "Klikni na žebljiček na časovnici, da ga odstraniš.",
+        "invalidFields": "Vsa vnosna polja morajo biti pravilno izpolnjena pred shranjevanjem."
     },
     "videoEditorComp": {
         "framesPerSecond": "Sličic na sekundo",

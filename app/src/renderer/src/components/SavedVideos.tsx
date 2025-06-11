@@ -42,19 +42,21 @@ export const SavedVideos = (): JSX.Element => {
     'center',
     'pivot',
     'backLeft',
-    'backRight'
+    'backRight',
+    'unspecified'
   ]
 
-  const positionKeyMap: Record<string, string> = {
-    'Left Wing': 'positions.leftWing',
-    'Right Wing': 'positions.rightWing',
-    'Center': 'positions.center',
-    'Pivot': 'positions.pivot',
-    'Back Left': 'positions.backLeft',
-    'Back Right': 'positions.backRight',
-    'Unspecified': 'positions.unspecified'
-  };
-
+  const normalizePositionKey = (pos: string): string => {
+  switch (pos?.toLowerCase()) {
+    case 'left wing': return 'leftWing';
+    case 'right wing': return 'rightWing';
+    case 'center': return 'center';
+    case 'pivot': return 'pivot';
+    case 'back left': return 'backLeft';
+    case 'back right': return 'backRight';
+    default: return 'unspecified';
+  }
+}
 
   const [showAreas, setShowAreas] = useState(false)
   const [showPositions, setShowPositions] = useState(false)
@@ -95,7 +97,7 @@ export const SavedVideos = (): JSX.Element => {
           title: r.label,
           duration: `${mm}:${ss}`,
           source: filename,
-          position: r.position || t('savedVideosComp.unspecified'),
+          position: normalizePositionKey(r.position) || 'unspecified',
           hand: r.shotHand || t('savedVideosComp.unspecified'),
           defended: r.defended || t('savedVideosComp.unspecified'),
           zone: r.zone,
@@ -177,7 +179,7 @@ export const SavedVideos = (): JSX.Element => {
       zone: editedVideo.zone,
       shotHand: editedVideo.hand,
       defended: editedVideo.defended,
-      position: editedVideo.position,
+      position: normalizePositionKey(editedVideo.position),
       thumbnail_path: editedVideo.thumbnail_path
     })
     } catch (err) {
@@ -248,11 +250,12 @@ export const SavedVideos = (): JSX.Element => {
     })
 
   const grouped = filteredCutouts.reduce<Record<string, SavedVideo[]>>((acc, video) => {
-    const key = video.position || t('savedVideosComp.unspecified')
-    if (!acc[key]) acc[key] = []
-    acc[key].push(video)
-    return acc
-  }, {})
+    const posKey = video.position || 'unspecified';
+    if (!acc[posKey]) acc[posKey] = [];
+    acc[posKey].push(video);
+    return acc;
+  }, {});
+
 
   return (
     <div className="position-relative">
@@ -393,7 +396,7 @@ export const SavedVideos = (): JSX.Element => {
         {/* Render grouped cutouts by position */}
         {Object.entries(grouped).map(([position, videos]) => (
           <div key={position} className="mb-5">
-            <h5 className="mb-3">{t(positionKeyMap[position] || position)}</h5>
+            <h5 className="mb-3">{t(`positions.${position}`) || position}</h5>
             <div className="d-flex flex-wrap gap-4">
               {videos.map((video) => (
                 <div key={video.id} className="card" style={{ width: '18rem' }}>
@@ -557,9 +560,9 @@ export const SavedVideos = (): JSX.Element => {
                       data-bs-toggle="dropdown"
                       aria-expanded="false"
                     >
-                       {editedVideo.position
-                          ? t(`positions.${editedVideo.position.replace(/\s+/g, '').charAt(0).toLowerCase() + editedVideo.position.replace(/\s+/g, '').slice(1)}`)
-                          : t('positions.selectPosition')}
+                      {editedVideo.position
+                        ? t(`positions.${editedVideo.position}`)
+                        : t('positions.selectPosition')}
                     </button>
                     <ul className="dropdown-menu px-3 py-2 w-100" style={{ minWidth: '250px' }}>
                       {allPositions.map((pos) => (

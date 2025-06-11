@@ -66,5 +66,32 @@
     "react-dom": "^19.1.0",
     "typescript": "^5.8.3",
     "vite": "^6.2.6"
+  },
+  "build": {
+    "appId": "gazepro.app",
+    "productName": "GazePro",
+    "directories": {
+      "buildResources": "resources"
+    },
+    "files": [
+      "dist/**",
+      "out/**",
+      "resources/**"
+    ],
+    "extraResources": [
+      {
+        "from": "resources",
+        "to": "resources"
+      }
+    ],
+    "win": {
+      "icon": "resources/icons/win/icon.ico"
+    },
+    "linux": {
+      "icon": "resources/icons/png/256x256.png"
+    },
+    "mac": {
+      "icon": "resources/icons/mac/icon.icns"
+    }
   }
 }

@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Alert } from './Alert'
 
 declare global {
   interface Window {
@@ -34,14 +35,20 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
   const [speed, setSpeed] = useState(1)
   const [isPaused, setIsPaused] = useState(false);
   const allPositions = [
-    'positions.leftWing',
-    'positions.rightWing',
-    'positions.center',
-    'positions.pivot',
-    'positions.backLeft',
-    'positions.backRight',
-  ];
+    'leftWing',
+    'rightWing',
+    'center',
+    'pivot',
+    'backLeft',
+    'backRight',
+  ]
 
+
+  const [alert, setAlert] = useState<{
+    id: number
+    message: string
+    type: 'danger' | 'info' | 'success' | 'warning'
+  } | null>(null)
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const [duration, setDuration] = useState(0)
@@ -177,6 +184,15 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
 
   const handleSaveCutout = async () => {
     if (!videoRef.current || !selectedVideoPath) return
+
+    if (!label || !zone || !position || !shotHand || !defended) {
+      setAlert({
+        id: Date.now(),
+        message: t('alerts.invalidFields'),
+        type: 'danger'
+      })
+      return
+    }
 
     const current = videoRef.current.currentTime
     const newCutoutFields = {
@@ -426,6 +442,11 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
             const time = vid.currentTime
             
             setFlags([...flags, time])
+            setAlert({
+              id: Date.now(),
+              message: t('alerts.flagInfo'),
+              type: 'info'
+            })
             setCurrentTime(time);
             setFlagMode(false)
             setTimeout(() => {
@@ -547,7 +568,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  {position || t('videoEditorComp.selectPosition')}
+                  {position ? t(`positions.${position}`) : t('videoEditorComp.selectPosition')}
                 </button>
                 <ul 
                   className="dropdown-menu px-3 py-2 w-100" 
@@ -566,7 +587,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
                         onChange={() => setPosition(pos)}
                       />
                       <label className="btn btn-outline-dark w-100" htmlFor={`pos-${pos}`}>
-                        {t(pos)}
+                        {t(`positions.${pos}`)}
                       </label>
                     </li>
                   ))}
@@ -646,6 +667,13 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
           </div>
         </form>
       </div>
+      {alert && (
+        <Alert
+          key={alert.id}
+          message={alert.message}
+          type={alert.type}
+        />
+      )}
     </div>
   )
 }

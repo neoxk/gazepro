@@ -1,4 +1,4 @@
-import { JSX, useEffect, useState } from "react";
+import { JSX, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import man from '../assets/images/handball-man.svg';
@@ -22,12 +22,22 @@ export const Home = ({ onContinue, onOpenFolder }: HomeProps): JSX.Element => {
     
     const [selectedSport, setSelectedSport] = useState('Handball');
     const [folderSelected, setFolderSelected] = useState(false);
-    
+    const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
+    const [maxChars, setMaxChars] = useState<number>(40);
+
+    const buttonRef = useRef<HTMLButtonElement | null>(null);
+
     const handleFolderSelect = async () => {
         const result = await onOpenFolder();
-            if (result && Array.isArray(result) && result.length > 0)
-                setFolderSelected(true); 
-    };
+        if (result && result.length > 0) {
+            const filePath = result[0];
+            const folderPath = filePath.substring(0, filePath.lastIndexOf('/')); // or '\\' for Windows, or better:
+            const sep = filePath.includes('\\') ? '\\' : '/';
+            const tempFolderPath = filePath.substring(0, filePath.lastIndexOf(sep));
+            setSelectedFolder(tempFolderPath);
+            setFolderSelected(true);
+        }
+        };
     
     const handleContinue = () => {
         onContinue()
@@ -47,10 +57,44 @@ export const Home = ({ onContinue, onOpenFolder }: HomeProps): JSX.Element => {
         i18n.changeLanguage(lang.code);
     };
 
+    const shortenPath = (fullPath: string, maxLength: number): string => {
+        const sep = fullPath.includes('\\') ? '\\' : '/';
+        if (fullPath.length <= maxLength) return fullPath;
+
+        const parts = fullPath.split(sep);
+        let shortened = '';
+
+        for (let i = parts.length - 1; i >= 0; i--) {
+            shortened = `${parts[i]}${shortened ? sep + shortened : ''}`;
+            if (shortened.length + 4 > maxLength) break; 
+        }
+
+        return '...' + sep + shortened;
+    };
+
+
     useEffect(() => {
         const lang = languages.find((l) => l.code === i18n.language)
         if (lang) setSelectedLanguage(lang)
     }, [i18n.language])
+
+    useEffect(() => {
+        const updateMaxChars = () => {
+            if (buttonRef.current) {
+                const width = buttonRef.current.offsetWidth;
+                const chars = Math.floor(width / 7);
+                setMaxChars(chars);
+            }
+        };
+
+        updateMaxChars();
+        window.addEventListener('resize', updateMaxChars);
+
+        return () => {
+            window.removeEventListener('resize', updateMaxChars);
+        };
+    }, []);
+
 
     return (
         <>
@@ -107,11 +151,12 @@ export const Home = ({ onContinue, onOpenFolder }: HomeProps): JSX.Element => {
                             <label className="form-label">{t('home.videoFolder')}:</label>
                             <button
                                 type="button"
-                                className="btn btn-red-damask w-100"
+                                className="btn btn-red-damask w-100 text-truncate"
                                 onClick={handleFolderSelect}
-                                >
+                                title={selectedFolder || ''}
+                            >
                                 <i className="bi bi-folder2-open me-2" />
-                                {folderSelected ? t('home.folderSelected') : t('openFolder')}
+                                {selectedFolder ? shortenPath(selectedFolder, maxChars) : t('openFolder')}
                             </button>
                         </div>
 

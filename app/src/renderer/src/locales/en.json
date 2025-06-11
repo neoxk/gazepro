@@ -20,7 +20,9 @@
     "alerts": {
         "noSeries": "Please add at least one series!",
         "folderRequired": "Please select a folder before continuing.",
-        "seriesFilterSet": "Each series must have at least one filter set."
+        "seriesFilterSet": "Each series must have at least one filter set.",
+        "flagInfo": "Click on the pin in the timeline to remove it.",
+        "invalidFields": "All input fields must be properly filled out before saving."
     },
     "videoEditorComp": {
         "framesPerSecond": "Frames Per Second",
@@ -93,9 +95,9 @@
         "startTraining": "Start Training",
         "restart": "Restart",
         "prevSeries": "Previous Series",
-        "prevClip": "Previous Clip,",
+        "prevClip": "Previous Clip",
         "nextSeries": "Next Series",
-        "nextClip": "Previous Clip",
+        "nextClip": "Next Clip",
         "expected": "Expected Zone",
         "enterActual": "Enter Actual Zone (1–9)",
         "reviewResponses": "Review Responses",
