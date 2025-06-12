@@ -158,7 +158,7 @@ OR
     ```bash
     npm run build:linux
     ```
-    This will generate a distributable version for your OS (Windows/Linux/Mac).
+    This will generate a distributable version for your OS (Windows/Linux).
 
 <br>
 
