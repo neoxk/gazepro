@@ -115,37 +115,3 @@ jobs:
           asset_content_type: application/octet-stream
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  release-macos:
-    needs: [build-and-test, create-release]
-    runs-on: macos-latest
-    if: startsWith(github.ref, 'refs/tags/v')
-    defaults:
-      run:
-        working-directory: app
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'npm'
-          cache-dependency-path: app/package-lock.json
-
-      - run: npm ci
-      - run: npm run build:mac
-
-      - name: Find DMG file
-        id: find_file
-        run: echo "file_path=$(find dist -name '*.dmg' -print -quit)" >> $GITHUB_OUTPUT
-
-      - name: Upload macOS Release Asset
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: app/${{ steps.find_file.outputs.file_path }}
-          asset_name: gazepro-${{ github.ref_name }}-mac.dmg
-          asset_content_type: application/octet-stream
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
