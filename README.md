@@ -63,7 +63,7 @@ To deliver a training platform that helps handball coaches create perceptual-rea
 
 <br>
 
-## 🧱 Tech Stack
+## 🧱 Technologies Used
 
 | Layer          | Technology                  |
 |----------------|-----------------------------|
@@ -74,9 +74,20 @@ To deliver a training platform that helps handball coaches create perceptual-rea
 | State          | React Hooks                 |
 | Localization   | i18next                     |
 
+
+### 🔧 Stack Badges
+
+[![Electron][Electron-shield]][Electron-url]
+[![Vite][Vite-shield]][Vite-url]
+[![React][React-shield]][React-url]
+[![TypeScript][TypeScript-shield]][TypeScript-url]
+[![Bootstrap][Bootstrap-shield]][Bootstrap-url]
+[![Bootstrap Icons][BootstrapIcons-shield]][BootstrapIcons-url]
+[![i18next][i18next-shield]][i18next-url]
+
 <br>
 
-## 🛠️ Installation
+## 🛠️ Installation & Getting Started
 
 To set up and run this project locally, follow the steps below:
 
@@ -100,13 +111,23 @@ To set up and run this project locally, follow the steps below:
     ```bash
     npm run dev
     ```
+    
+OR
 
 5. Build for Production:
+   - For Windows, use:
     ```bash
-    npm run build
-    npm run package
+    npm run build:win
     ```
-    This will generate a distributable version for your OS (Windows/Mac/Linux).
+    - For Linux, use:
+    ```bash
+    npm run build:linux
+    ```
+    - For Mac, use:
+    ```bash
+    npm run build:mac
+    ```
+    This will generate a distributable version for your OS (Windows/Linux/Mac).
 
 <br>
 
@@ -145,6 +166,33 @@ To set up and run this project locally, follow the steps below:
 
 <br>
 
+## 📸 Screenshots
+
+### 🖼️ Home Page
+<div align="center">
+  <img src="./_PROMOCIJA/Screenshoti/ANGLEŠČINA/00-HomeScreen.png" alt="Home Screen" width="70%" />
+</div>
+
+### 🏘️ Video Editor
+<div align="center">
+  <img src="./_PROMOCIJA/Screenshoti/ANGLEŠČINA/10-VideoEditor.png" alt="Video Editor 01" width="70%" />
+</div>
+<div align="center">
+  <img src="./_PROMOCIJA/Screenshoti/ANGLEŠČINA/20-VideoEditor.png" alt="Video Editor 02" width="70%" />
+</div>
+
+### 📝 Saved Videos
+<div align="center">
+  <img src="./_PROMOCIJA/Screenshoti/ANGLEŠČINA/30-SavedVideos.png" alt="Saved Videos" width="70%" />
+</div>
+
+### 📝 Training Module
+<div align="center">
+  <img src="./_PROMOCIJA/Screenshoti/ANGLEŠČINA/TrainingModule.png" alt="Training Module" width="70%" />
+</div>
+
+<br>
+
 ## 👥 Team Members
 
 - Neo Xander Kirbiš
@@ -156,3 +204,26 @@ To set up and run this project locally, follow the steps below:
 ## 📄 License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
+
+
+
+[Electron-shield]: https://img.shields.io/badge/Electron-2C2E3B?style=for-the-badge&logo=electron&logoColor=9FEAF9
+[Electron-url]: https://www.electronjs.org/
+
+[Vite-shield]: https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white
+[Vite-url]: https://vitejs.dev/
+
+[React-shield]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
+[React-url]: https://reactjs.org/
+
+[TypeScript-shield]: https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white
+[TypeScript-url]: https://www.typescriptlang.org/
+
+[Bootstrap-shield]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
+[Bootstrap-url]: https://getbootstrap.com
+
+[BootstrapIcons-shield]: https://img.shields.io/badge/Bootstrap%20Icons-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white
+[BootstrapIcons-url]: https://icons.getbootstrap.com/
+
+[i18next-shield]: https://img.shields.io/badge/i18next-26A69A?style=for-the-badge&logo=i18next&logoColor=white
+[i18next-url]: https://www.i18next.com/
