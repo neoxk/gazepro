@@ -255,7 +255,7 @@ export const Training = () => {
             <h5 className="mb-3">{t('trainingComp.series')} {idx + 1}</h5>
             <div className="row align-items-end">
               <div className="col-md-6">
-                <label className="form-label">{t('positions.position')}:</label>
+                <label className="form-label">{t('position')}:</label>
                 <div className="dropdown w-100">
                   <button
                     className="form-select text-start"
@@ -263,7 +263,7 @@ export const Training = () => {
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                   >
-                    {getDropdownText(filter.positions.map(p => t(`positions.${p}`)), t('trainingComp.selectPositions'))}
+                    {getDropdownText(filter.positions.map(p => t(`${p}`)), t('trainingComp.selectPositions'))}
                   </button>
                   <ul
                     className="dropdown-menu px-3 py-2 w-100"
@@ -284,7 +284,7 @@ export const Training = () => {
                           className="btn btn-outline-dark w-100"
                           htmlFor={`position-${idx}-${pos}`}
                         >
-                          {t(`positions.${pos}`)}
+                          {t(`${pos}`)}
                         </label>
                       </li>
                     ))}
@@ -302,7 +302,7 @@ export const Training = () => {
               </div>
 
               <div className="col-md-6">
-                <label className="form-label">{t('positions.position')}:</label>
+                <label className="form-label">{t('videoEditorComp.area')}:</label>
                 <div className="dropdown w-100">
                   <button
                     className="form-select text-start"

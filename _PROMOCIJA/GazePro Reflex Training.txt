@@ -1,0 +1,25 @@
+GazePro Reflex Training
+
+Zaznavno-odzivno orodje za video trening športnih vratarjev, ki omogoča označevanje, obdelavo in projekcijo ključnih dogodkov.
+
+Leto izdelave: 2025
+
+Avtorji:
+Gal Petelin
+Neo Xander Kirbiš
+Ena Imamović
+
+Vir podatkov: Interni video posnetki ŽRK Krim
+Koda: https://github.com/neoxk/gazepro
+
+Kategorizacija: Namizna aplikacija
+
+Oznake: Electron, ReactJS (Vite), TypeScript, BootStrap, SQLite, VideoProcessing, UXDesign, Agile
+
+Opis projekta:
+GazePro je namizna aplikacija, namenjena zaznavno-odzivnemu treningu športnih vratarjev, s poudarkom na rokometu in razvita v sodelovanju z ŽRK Krim. Aplikacija omogoča nalaganje, obdelavo in predvajanje video posnetkov s ciljem izboljšanja hitrosti reakcij in odločanja vratarjev v simuliranih tekmovalnih pogojih. 
+
+V prvi fazi omogoča lokalno hranjenje in indeksiranje videov, časovno rezanje na izrezke, označevanje kritičnih dogodkov (kot so streli iz različnih con), določanje hitrosti predvajanja ter metapodatkov (položaj igralca, obramba, roka udarca ipd.). Snemki so nato razporejeni v katalogu, kjer jih lahko trenerji filtrirajo in analizirajo. V treningu se izrezki projicirajo na veliko platno, medtem ko vratar v realnem času reagira na prikazani dogodek. 
+
+Rešitev podpira večjezičnost, intuitiven uporabniški vmesnik in osnovno statistično sledenje odzivom igralcev, kar trenerjem omogoča natančno spremljanje napredka.
+
