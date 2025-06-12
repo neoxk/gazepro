@@ -49,16 +49,14 @@
         "yes": "Da",
         "no": "Ne"
     },
-    "positions": {
-        "position": "Položaj",
-        "leftWing": "Levo krilo",
-        "rightWing": "Desno krilo",
-        "center": "Srednji",
-        "pivot": "Krožni napadalec",
-        "backLeft": "Levi zunanji",
-        "backRight": "Desni zunanji",
-        "unspecified": "Nedoločeno"
-    },
+    "position": "Položaj",
+    "leftWing": "Levo krilo",
+    "rightWing": "Desno krilo",
+    "center": "Srednji",
+    "pivot": "Krožni napadalec",
+    "backLeft": "Levi zunanji",
+    "backRight": "Desni zunanji",
+    "unspecified": "Nedoločeno",
     "savedVideosComp": {
         "unspecified": "Nedoločeno",
         "title": "Shranjeni videoposnetki",

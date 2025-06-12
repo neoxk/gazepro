@@ -36,27 +36,20 @@ export const SavedVideos = (): JSX.Element => {
 
   const [selectedZones, setSelectedZones] = useState<number[]>([])
   const [selectedPositions, setSelectedPositions] = useState<string[]>([])
-  const allPositions = [
+  const [allPositions] = useState<string[]>([
     'leftWing',
     'rightWing',
     'center',
     'pivot',
     'backLeft',
-    'backRight',
-    'unspecified'
-  ]
+    'backRight'
+  ])
 
   const normalizePositionKey = (pos: string): string => {
-  switch (pos?.toLowerCase()) {
-    case 'left wing': return 'leftWing';
-    case 'right wing': return 'rightWing';
-    case 'center': return 'center';
-    case 'pivot': return 'pivot';
-    case 'back left': return 'backLeft';
-    case 'back right': return 'backRight';
-    default: return 'unspecified';
-  }
-}
+    const validKeys = ['leftWing', 'rightWing', 'center', 'pivot', 'backLeft', 'backRight'];
+    return validKeys.includes(pos) ? pos : 'unspecified';
+  };
+
 
   const [showAreas, setShowAreas] = useState(false)
   const [showPositions, setShowPositions] = useState(false)
@@ -179,7 +172,7 @@ export const SavedVideos = (): JSX.Element => {
       zone: editedVideo.zone,
       shotHand: editedVideo.hand,
       defended: editedVideo.defended,
-      position: normalizePositionKey(editedVideo.position),
+      position: editedVideo.position,
       thumbnail_path: editedVideo.thumbnail_path
     })
     } catch (err) {
@@ -250,9 +243,9 @@ export const SavedVideos = (): JSX.Element => {
     })
 
   const grouped = filteredCutouts.reduce<Record<string, SavedVideo[]>>((acc, video) => {
-    const posKey = video.position || 'unspecified';
-    if (!acc[posKey]) acc[posKey] = [];
-    acc[posKey].push(video);
+    const key = video.position || 'unspecified';
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(video);
     return acc;
   }, {});
 
@@ -396,7 +389,7 @@ export const SavedVideos = (): JSX.Element => {
         {/* Render grouped cutouts by position */}
         {Object.entries(grouped).map(([position, videos]) => (
           <div key={position} className="mb-5">
-            <h5 className="mb-3">{t(`positions.${position}`) || position}</h5>
+            <h5 className="mb-3">{t(position) || position}</h5>
             <div className="d-flex flex-wrap gap-4">
               {videos.map((video) => (
                 <div key={video.id} className="card" style={{ width: '18rem' }}>
@@ -552,7 +545,7 @@ export const SavedVideos = (): JSX.Element => {
                   </div>
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">{t('positions.position')}</label>
+                  <label className="form-label">{t('position')}</label>
                   <div className="dropdown w-100">
                     <button
                       className="form-select text-start"
@@ -561,8 +554,8 @@ export const SavedVideos = (): JSX.Element => {
                       aria-expanded="false"
                     >
                       {editedVideo.position
-                        ? t(`positions.${editedVideo.position}`)
-                        : t('positions.selectPosition')}
+                        ? t(editedVideo.position)
+                        : t('videoEditorComp.selectPosition')}
                     </button>
                     <ul className="dropdown-menu px-3 py-2 w-100" style={{ minWidth: '250px' }}>
                       {allPositions.map((pos) => (
@@ -580,7 +573,7 @@ export const SavedVideos = (): JSX.Element => {
                             className="btn btn-outline-dark w-100"
                             htmlFor={`modal-pos-${pos}`}
                           >
-                            {t(`positions.${pos}`)}
+                            {t(pos)}
                           </label>
                         </li>
                       ))}

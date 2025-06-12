@@ -49,16 +49,14 @@
         "yes": "Yes",
         "no": "No"
     },
-    "positions": {
-        "position": "Position",
-        "leftWing": "Left Wing",
-        "rightWing": "Right Wing",
-        "center": "Center",
-        "pivot": "Pivot",
-        "backLeft": "Back Left",
-        "backRight": "Back Right",
-        "unspecified": "Unspecified"
-    },
+    "position": "Position",
+    "leftWing": "Left Wing",
+    "rightWing": "Right Wing",
+    "center": "Center",
+    "pivot": "Pivot",
+    "backLeft": "Back Left",
+    "backRight": "Back Right",
+    "unspecified": "Unspecified",
     "savedVideosComp": {
         "unspecified": "Unspecified",
         "title": "Saved Videos",

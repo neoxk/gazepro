@@ -33,16 +33,8 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
   const [defended, setDefended] = useState('no')
   const [position, setPosition] = useState('')
   const [speed, setSpeed] = useState(1)
-  const [isPaused, setIsPaused] = useState(false);
-  const allPositions = [
-    'leftWing',
-    'rightWing',
-    'center',
-    'pivot',
-    'backLeft',
-    'backRight',
-  ]
-
+  const [isPaused, setIsPaused] = useState(false)
+  const allPositions = ['leftWing', 'rightWing', 'center', 'pivot', 'backLeft', 'backRight']
 
   const [alert, setAlert] = useState<{
     id: number
@@ -568,7 +560,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                 >
-                  {position ? t(`positions.${position}`) : t('videoEditorComp.selectPosition')}
+                  {t(position) || t('videoEditorComp.selectPosition')}
                 </button>
                 <ul 
                   className="dropdown-menu px-3 py-2 w-100" 
@@ -587,7 +579,7 @@ export const VideoEditor = ({ selectedVideoPath }: Props) => {
                         onChange={() => setPosition(pos)}
                       />
                       <label className="btn btn-outline-dark w-100" htmlFor={`pos-${pos}`}>
-                        {t(`positions.${pos}`)}
+                        {t(pos)}
                       </label>
                     </li>
                   ))}
