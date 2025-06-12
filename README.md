@@ -12,7 +12,7 @@
 
 <br>
 
-**GazePro Reflex Training** is a desktop application designed to support perceptual-reaction training of sports goalkeepers, primarily in handball. The app allows trainers to store, tag, cut, and play video clips as part of customizable training sessions. Developed in collaboration with a handball team, it is aimed at enhancing athlete reflexes and situational awareness through real-time feedback and video-based exercises.
+**GazePro Reflex Training** is a desktop application designed to support perceptual-reaction training of sports goalkeepers, primarily in handball. The app allows trainers to store, tag, cut, and play video clips as part of customizable training sessions. Developed in collaboration with ŽRK Krim, one of Slovenia’s top handball clubs, it is aimed at enhancing athlete reflexes and situational awareness through real-time feedback and video-based exercises.
 
 <br>
 
@@ -63,6 +63,27 @@ To deliver a training platform that helps handball coaches create perceptual-rea
 
 <br>
 
+## 🧭 Application Architecture
+
+The GazePro Reflex Training app is structured around Electron, which enables us to build cross-platform desktop apps using web technologies.
+
+The architecture consists of:
+- **Renderer Processes** (Windows): Where the user interface is rendered using React and TypeScript.
+- **Main Process** (Electron Core): Handles OS-level interactions and native file access.
+- **IPC Communication**: Securely bridges communication between the UI and the backend.
+- **Local Data Handling**: Using SQLite for persistent, portable storage of video metadata and training responses.
+- **Modular Design**: Structured codebase with components, services, and domain-specific modules for scalability and maintainability.
+
+<br>
+<div align="center"> 
+  <img src="./_PROMOCIJA/Arhitektura.png" alt="Home Screen" width="50%" />
+</div>
+<br>
+
+This modular architecture enables high testability, platform independence, and seamless integration with local video and file systems.
+
+<br>
+
 ## 🧱 Technologies Used
 
 | Layer          | Technology                  |
@@ -84,6 +105,20 @@ To deliver a training platform that helps handball coaches create perceptual-rea
 [![Bootstrap][Bootstrap-shield]][Bootstrap-url]
 [![Bootstrap Icons][BootstrapIcons-shield]][BootstrapIcons-url]
 [![i18next][i18next-shield]][i18next-url]
+
+<br>
+
+## 🧩 External Dependencies
+
+| Dependency | Purpose |
+|------------|---------|
+| Electron   | Cross-platform desktop application shell |
+| Vite       | Frontend bundling and performance |
+| React + TypeScript | UI and logic |
+| Bootstrap  | UI styling |
+| i18next    | Multilingual support |
+| SQLite     | Lightweight, embedded database for offline use |
+| Node.js    | Runtime for backend logic within Electron |
 
 <br>
 
@@ -115,6 +150,7 @@ To set up and run this project locally, follow the steps below:
 OR
 
 5. Build for Production:
+
    - For Windows, use:
     ```bash
     npm run build:win
@@ -128,6 +164,19 @@ OR
     npm run build:mac
     ```
     This will generate a distributable version for your OS (Windows/Linux/Mac).
+
+<br>
+
+## 📦 Releases & Portability
+
+You can find the latest working **portable version** of the app under the [Releases](https://github.com/neoxk/gazepro/releases) section on GitHub.
+
+- 💻 **Cross-platform** support (Windows, Mac, Linux)
+- 📁 **No installation required** - just extract and run the `.exe` / `.AppImage` / `.dmg` file
+- 🗄️ Powered by SQLite to ensure **portability with zero setup**
+- 📌 Always download the **latest release** to get the newest features and fixes
+
+> Simply extract the release archive and run the executable – no installation, no database setup. Just plug and play!
 
 <br>
 
@@ -166,6 +215,17 @@ OR
 
 <br>
 
+## 🔭 Further Development
+
+Future directions include:
+
+- 🕶️ **VR Integration** for immersive goalkeeper training  
+- 👁️ **Eye Tracking Support** for precision-based decision metrics  
+- 📊 **Advanced Analytics Dashboards** to evaluate player reflex trends over time  
+- 🏑 **Support for Additional Sports** such as hockey, futsal, and football to broaden the application of perceptual training
+
+<br>
+
 ## 📸 Screenshots
 
 ### 🖼️ Home Page
@@ -188,7 +248,7 @@ OR
 
 ### 📝 Training Module
 <div align="center">
-  <img src="./_PROMOCIJA/Screenshoti/ANGLEŠČINA/TrainingModule.png" alt="Training Module" width="70%" />
+  <img src="./_PROMOCIJA/Screenshoti/ANGLEŠČINA/40-TrainingModule.png" alt="Training Module" width="70%" />
 </div>
 
 <br>
