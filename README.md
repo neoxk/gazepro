@@ -118,7 +118,6 @@ This modular architecture enables high testability, platform independence, and s
 | Bootstrap  | UI styling |
 | i18next    | Multilingual support |
 | SQLite     | Lightweight, embedded database for offline use |
-| Node.js    | Runtime for backend logic within Electron |
 
 <br>
 
@@ -159,10 +158,6 @@ OR
     ```bash
     npm run build:linux
     ```
-    - For Mac, use:
-    ```bash
-    npm run build:mac
-    ```
     This will generate a distributable version for your OS (Windows/Linux/Mac).
 
 <br>
@@ -171,8 +166,8 @@ OR
 
 You can find the latest working **portable version** of the app under the [Releases](https://github.com/neoxk/gazepro/releases) section on GitHub.
 
-- 💻 **Cross-platform** support (Windows, Mac, Linux)
-- 📁 **No installation required** - just extract and run the `.exe` / `.AppImage` / `.dmg` file
+- 💻 **Cross-platform** support (Windows, Linux)
+- 📁 **No installation required** - just extract and run the `.exe` / `.AppImage` file
 - 🗄️ Powered by SQLite to ensure **portability with zero setup**
 - 📌 Always download the **latest release** to get the newest features and fixes
 
